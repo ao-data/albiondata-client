@@ -32,7 +32,7 @@ type albionState struct {
 }
 
 func (state albionState) IsValidLocation() bool {
-	log.Error("Game IP: %s", state.GameServerIP)
+	log.Error("Game IP: ", state.GameServerIP)
 
 	if state.LocationId < 0 {
 		if state.LocationId == -1 {

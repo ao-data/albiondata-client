@@ -159,7 +159,7 @@ func (l *listener) processPacket(packet gopacket.Packet) {
 		return
 	}
 
-	l.router.albionstate.GameServerIP = fmt.Sprintf("%b", ipv4.SrcIP)
+	l.router.albionstate.GameServerIP = ipv4.SrcIP.String()
 
 	layer := packet.Layer(photon.PhotonLayerType)
 

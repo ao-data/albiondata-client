@@ -146,6 +146,21 @@ func (l *listener) stop() {
 }
 
 func (l *listener) processPacket(packet gopacket.Packet) {
+	// determine ipv4 address
+	ipLayer := packet.Layer(layers.LayerTypeIPv4)
+	ipv4 := ipLayer.(*layers.IPv4)
+	if ipLayer != nil {
+		ipv4, _ = ipLayer.(*layers.IPv4)
+		log.Debugf("Packet came from: %s", ipv4.SrcIP)
+	}
+
+	if ipv4.SrcIP == nil {
+		log.Debug("No IPv4 detected")
+		return
+	}
+
+	l.router.albionstate.GameServerIP = fmt.Sprintf("%b", ipv4.SrcIP)
+
 	layer := packet.Layer(photon.PhotonLayerType)
 
 	if layer == nil {

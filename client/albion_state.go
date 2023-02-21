@@ -20,6 +20,8 @@ type albionState struct {
 	LocationString string
 	CharacterId    lib.CharacterID
 	CharacterName  string
+	GameServerIP   string
+	AODataId	   int
 
 	// A lot of information is sent out but not contained in the response when requesting marketHistory (e.g. ID)
 	// This information is stored in marketHistoryInfo
@@ -30,6 +32,8 @@ type albionState struct {
 }
 
 func (state albionState) IsValidLocation() bool {
+	log.Error("Game IP: %s", state.GameServerIP)
+
 	if state.LocationId < 0 {
 		if state.LocationId == -1 {
 			log.Error("The players location has not yet been set. Please transition zones so the location can be identified.")

@@ -27,3 +27,7 @@ jobs:
     #     script-file: "pkg/nsis/albiondata-client.nsi"
     - name: Install nsis
       run: sudo apt-get -y install nsis
+    - name: Make Installer
+      run: cd pkg/nsis;make nsis
+
+      

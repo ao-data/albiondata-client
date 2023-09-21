@@ -1,0 +1,22 @@
+on:
+  workflow_dispatch:
+
+jobs:
+  build-windows:
+    name: Build Windows Client
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Go
+      uses: actions/setup-go@v3
+      with:
+        go-version: 1.16
+
+    # - uses: shogo82148/actions-upload-release-asset@v1
+    #   with:
+    #     upload_url: ${{ github.event.release.upload_url }}
+    #     asset_path: update-linux-amd64.gz
+  - name: Create installer
+    uses: joncloud/makensis-action@v4
+    # with:
+    #   arguments: "/V3"

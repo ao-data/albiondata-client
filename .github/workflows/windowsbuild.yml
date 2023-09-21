@@ -1,3 +1,4 @@
+name: Test Build
 on:
   workflow_dispatch:
     inputs:
@@ -18,7 +19,7 @@ jobs:
     #   with:
     #     upload_url: ${{ github.event.release.upload_url }}
     #     asset_path: update-linux-amd64.gz
-  - name: Create installer
-    uses: joncloud/makensis-action@v4
-    # with:
-    #   arguments: "/V3"
+    - name: Create installer
+      uses: joncloud/makensis-action@v4
+      # with:
+      #   arguments: "/V3"

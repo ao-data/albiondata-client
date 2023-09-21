@@ -20,8 +20,10 @@ jobs:
     #   with:
     #     upload_url: ${{ github.event.release.upload_url }}
     #     asset_path: update-linux-amd64.gz
-    - name: Create installer
-      uses: joncloud/makensis-action@v4
-      with:
-        # arguments: "script-file"
-        script-file: "pkg/nsis/albiondata-client.nsi"
+    # - name: Create installer
+    #   uses: joncloud/makensis-action@v4
+    #   with:
+    #     # arguments: "script-file"
+    #     script-file: "pkg/nsis/albiondata-client.nsi"
+    - name: Install nsis
+      run: sudo apt-get -y install nsis

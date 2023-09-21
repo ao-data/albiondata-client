@@ -21,5 +21,6 @@ jobs:
     #     asset_path: update-linux-amd64.gz
     - name: Create installer
       uses: joncloud/makensis-action@v4
-      # with:
-      #   arguments: "/V3"
+      with:
+        # arguments: "script-file"
+        script-file: "pkg/nsis/albiondata-client.nsi"

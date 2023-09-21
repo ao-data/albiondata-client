@@ -1,6 +1,8 @@
 on:
   workflow_dispatch:
-
+    inputs:
+      noop:
+        description: 'Dry run? true/false'
 jobs:
   build-windows:
     name: Build Windows Client

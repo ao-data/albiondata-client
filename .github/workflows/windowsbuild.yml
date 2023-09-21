@@ -7,7 +7,8 @@ on:
 jobs:
   build-windows:
     name: Build Windows Client
-    runs-on: windows-latest
+    # runs-on: windows-latest
+    runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
     - name: Set up Go

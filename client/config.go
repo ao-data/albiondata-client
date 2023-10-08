@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/broderickhyman/albiondata-client/log"
+	"github.com/ao-data/albiondata-client/log"
 
 	"github.com/mattn/go-colorable"
 	"github.com/sirupsen/logrus"
@@ -37,6 +37,7 @@ type config struct {
 	PrivateIngestBaseUrls          string
 	PublicIngestBaseUrls           string
 	NoCPULimit                     bool
+	PrintVersion                   bool
 }
 
 //config global config data
@@ -59,6 +60,7 @@ func (config *config) SetupFlags() {
 	if config.DisableUpload {
 		log.Info("Upload is disabled.")
 	}
+
 	config.setupLogs()
 }
 
@@ -78,6 +80,13 @@ func (config *config) setupWebsocketFlags() {
 }
 
 func (config *config) setupDebugFlags() {
+	flag.BoolVar(
+		&config.PrintVersion,
+		"version",
+		false,
+		"Print version, then close.",
+	)
+
 	flag.BoolVar(
 		&config.Debug,
 		"debug",

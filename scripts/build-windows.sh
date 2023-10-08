@@ -2,39 +2,30 @@
 
 set -eo pipefail
 
-# sudo apt update && sudo apt install -y nsis nsis-pluginapi wine wine32
+rm -f rsrc_windows_*
+rm -f albiondata-client.exe
+rm -f albiondata-client.*.bak
+rm -f .albiondata-client.*.old
 
-sudo dpkg --add-architecture i386 && sudo apt-get update && sudo apt-get install -y --no-install-recommends \
-		g++ \
-		gcc \
-		libc6-dev \
-		make \
-		pkg-config \
-		ca-certificates \
-		wget \
-		git \
-		ssh \
-		mingw-w64 \
-		nsis \
-		wine-stable \
-		wine32
+rm -f albiondata-client-amd64-installer.exe
 
-export CGO_CPPFLAGS="-I $GOPATH/src/github.com/broderickhyman/albiondata-client/thirdparty/WpdPack/Include/"
-export CGO_LDFLAGS="-L $GOPATH/src/github.com/broderickhyman/albiondata-client/thirdparty/WpdPack/Lib/x64/"
-export GOOS=windows
-export GOARCH=amd64
-export CGO_ENABLED=1
-export CXX=x86_64-w64-mingw32-g++
-export CC=x86_64-w64-mingw32-gcc
-go build -ldflags "-s -w -X main.version=$GITHUB_REF_NAME" -o albiondata-client.exe -v -x albiondata-client.go
+go install github.com/tc-hib/go-winres@latest
 
-# Add icon to the .exe
-wine thirdparty/rcedit/rcedit.exe albiondata-client.exe --set-icon icon/albiondata-client.ico
+export PATH="$PATH:/root/go/bin"
 
-# Make the NSIS Installer
+go-winres make
+
+env GOOS=windows GOARCH=amd64 go build -ldflags "-s -w -X main.version=$GITHUB_REF_NAME" -o albiondata-client.exe -v -x albiondata-client.go
+
+go-winres patch albiondata-client.exe
+
 cd pkg/nsis
 make nsis
-cd ../..
 
+cd ../..
+ls -la albiondata-client*
+
+cp albiondata-client.exe albiondata-client.exe.copy
 gzip -9 albiondata-client.exe
 mv albiondata-client.exe.gz update-windows-amd64.exe.gz
+mv albiondata-client.exe.copy albiondata-client.exe

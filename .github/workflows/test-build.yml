@@ -14,6 +14,19 @@ jobs:
         go-version: 1.16
     - name: Build
       run: make build-linux
+
+    - uses: actions/upload-artifact@v3
+      if: ${{ env.ACT }}
+      with:
+        name: files
+        path: albiondata-client
+
+    - uses: actions/upload-artifact@v3
+      if: ${{ env.ACT }}
+      with:
+        name: files
+        path: update-linux-amd64.gz
+
   build-windows:
     name: Build Windows Client
     runs-on: ubuntu-latest
@@ -23,8 +36,31 @@ jobs:
       uses: actions/setup-go@v3
       with:
         go-version: 1.16
-    - name: Build
+
+    - name: install nsis
+      run: sudo apt-get update; sudo apt-get -y install nsis
+
+    - name: Make
       run: make build-windows
+
+    - uses: actions/upload-artifact@v3
+      if: ${{ env.ACT }}
+      with:
+        name: files
+        path: albiondata-client.exe
+
+    - uses: actions/upload-artifact@v3
+      if: ${{ env.ACT }}
+      with:
+        name: files
+        path: update-windows-amd64.exe.gz
+
+    - uses: actions/upload-artifact@v3
+      if: ${{ env.ACT }}
+      with:
+        name: files
+        path: albiondata-client-amd64-installer.exe
+
   build-darwin:
     name: Build MacOS Client
     runs-on: macos-13

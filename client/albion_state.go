@@ -1,9 +1,9 @@
 package client
 
 import (
-	"github.com/broderickhyman/albiondata-client/lib"
-	"github.com/broderickhyman/albiondata-client/log"
-	"github.com/broderickhyman/albiondata-client/notification"
+	"github.com/ao-data/albiondata-client/lib"
+	"github.com/ao-data/albiondata-client/log"
+	"github.com/ao-data/albiondata-client/notification"
 	"strings"
 )
 

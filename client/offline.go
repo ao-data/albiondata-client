@@ -4,7 +4,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/broderickhyman/albiondata-client/log"
+	"github.com/ao-data/albiondata-client/log"
 )
 
 func processOffline(path string) {

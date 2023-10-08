@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/broderickhyman/albiondata-client/log"
+	"github.com/ao-data/albiondata-client/log"
 )
 
 var MailInfos MailInfosLookup

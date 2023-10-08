@@ -3,8 +3,8 @@ package client
 import (
 	"encoding/json"
 
-	"github.com/broderickhyman/albiondata-client/lib"
-	"github.com/broderickhyman/albiondata-client/log"
+	"github.com/ao-data/albiondata-client/lib"
+	"github.com/ao-data/albiondata-client/log"
 )
 
 type operationAuctionGetOffers struct {

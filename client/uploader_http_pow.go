@@ -14,7 +14,7 @@ import (
 	"io/ioutil"
 	"strconv"
 
-	"github.com/broderickhyman/albiondata-client/log"
+	"github.com/ao-data/albiondata-client/log"
 )
 
 type httpUploaderPow struct {

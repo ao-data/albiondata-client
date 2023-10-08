@@ -1,10 +1,10 @@
-module github.com/broderickhyman/albiondata-client
+module github.com/ao-data/albiondata-client
 
 go 1.16
 
 require (
-	github.com/broderickhyman/go-githubupdate v0.0.0-20210616044731-0a6ee555c7dd
-	github.com/broderickhyman/photon_spectator v0.0.0-20201019232055-713aea094aa8
+	github.com/ao-data/go-githubupdate v0.0.0-20230216133638-c4accecc2f64
+	github.com/ao-data/photon_spectator v0.0.0-20201019232055-713aea094aa8
 	github.com/ctcpip/notifize v1.0.0
 	github.com/fsnotify/fsnotify v1.4.9 // indirect
 	github.com/getlantern/golog v0.0.0-20201022140317-a8d13dc71777 // indirect
@@ -29,8 +29,9 @@ require (
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/spf13/viper v1.7.1
+	github.com/tc-hib/go-winres v0.3.1 // indirect
+	golang.org/x/net v0.6.0 // indirect
 	golang.org/x/sys v0.5.0
-	golang.org/x/tools v0.6.0 // indirect
 	gopkg.in/ini.v1 v1.62.0 // indirect
 	gopkg.in/toast.v1 v1.0.0-20180812000517-0a84660828b2
 	gopkg.in/yaml.v2 v2.3.0 // indirect

@@ -5,11 +5,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/broderickhyman/albiondata-client/client"
-	"github.com/broderickhyman/albiondata-client/log"
-	"github.com/broderickhyman/albiondata-client/systray"
+	"github.com/ao-data/albiondata-client/client"
+	"github.com/ao-data/albiondata-client/log"
+	"github.com/ao-data/albiondata-client/systray"
 
-	"github.com/broderickhyman/go-githubupdate/updater"
+	"github.com/ao-data/go-githubupdate/updater"
 )
 
 var version string
@@ -19,6 +19,11 @@ func init() {
 }
 
 func main() {
+	if client.ConfigGlobal.PrintVersion {
+		log.Infof("Albion Data Client, version: %s", version)
+		return
+	}
+
 	startUpdater()
 
 	go systray.Run()

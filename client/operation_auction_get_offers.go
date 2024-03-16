@@ -15,11 +15,18 @@ type operationAuctionGetOffers struct {
 	EnchantmentLevel string   `mapstructure:"8"`
 	ItemIds          []uint16 `mapstructure:"6"`
 	MaxResults       uint32   `mapstructure:"9"`
-	IsAscendingOrder bool     `mapstructure:"12"`
+	//Offset           int      `mapstructure:"10"`
+	IsDescOrder      int      `mapstructure:"11"`
 }
 
 func (op operationAuctionGetOffers) Process(state *albionState) {
 	log.Debug("Got AuctionGetOffers operation...")
+	//state.MarketBrowserOffset = op.Offset
+	if op.IsDescOrder == 0 {
+		state.MarketBrowserAsc = true
+	} else {
+		state.MarketBrowserAsc = false
+	}
 }
 
 type operationAuctionGetOffersResponse struct {
@@ -31,6 +38,19 @@ func (op operationAuctionGetOffersResponse) Process(state *albionState) {
 
 	if !state.IsValidLocation() {
 		return
+	}
+
+	// Dont do this for Caerleon, Black Market (behaves differently e.g. DESC is the default)
+	if state.LocationId != 3003 {
+		if !state.MarketBrowserAsc {
+			log.Debug("MarketBrowser: Ignoring because of DESC order")
+			return
+		}
+
+		// if state.MarketBrowserOffset != 0 {
+		// 	log.Debug("MarketBrowser: Ignoring because not 1st page")
+		// 	return
+		// }
 	}
 
 	var orders []*lib.MarketOrder

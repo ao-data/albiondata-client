@@ -23,6 +23,8 @@ type albionState struct {
 	CharacterName  string
 	GameServerIP   string
 	AODataServerID int
+	MarketBrowserOffset int // Offset of the market browser. i.e. nil is viewing the first page, 50 the second
+	MarketBrowserAsc bool // Market browser is in asc order
 
 	// A lot of information is sent out but not contained in the response when requesting marketHistory (e.g. ID)
 	// This information is stored in marketHistoryInfo

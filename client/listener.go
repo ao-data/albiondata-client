@@ -147,7 +147,13 @@ func (l *listener) stop() {
 
 func (l *listener) processPacket(packet gopacket.Packet) {
 	ipLayer := packet.Layer(layers.LayerTypeIPv4)
+
+	if ipLayer == nil {
+		return
+	}
+
 	ipv4 := ipLayer.(*layers.IPv4)
+
 	if ipLayer != nil {
 		ipv4, _ = ipLayer.(*layers.IPv4)
 		log.Tracef("Packet came from: %s", ipv4.SrcIP)

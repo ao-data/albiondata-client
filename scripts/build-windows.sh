@@ -9,7 +9,7 @@ rm -f .albiondata-client.*.old
 
 rm -f albiondata-client-amd64-installer.exe
 
-go install github.com/tc-hib/go-winres@V0.3.1
+go install github.com/tc-hib/go-winres@v0.3.1
 
 export PATH="$PATH:/root/go/bin"
 

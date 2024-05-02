@@ -1,3 +1,4 @@
+//go:build windows
 // +build windows
 
 package systray
@@ -8,9 +9,13 @@ import (
 
 	"github.com/ao-data/albiondata-client/client"
 
+	"time"
+
 	"github.com/ao-data/albiondata-client/icon"
+	"github.com/ao-data/albiondata-client/log"
 	"github.com/getlantern/systray"
 	"github.com/gonutz/w32"
+	"github.com/shirou/gopsutil/process"
 )
 
 var consoleHidden bool
@@ -55,7 +60,47 @@ func onExit() {
 
 }
 
+const targetProcessName string = "Albion-Online.exe"
+const albionProcessTimeBetweenChecks int = 5
+
+// Gets all processes periodically and stops when albion is found running.
+func findAlbionProcess(found chan<- bool) {
+
+	log.Info("Waiting for Albion to start...")
+
+	// Endless loop to check periodically if {targetProcessName} process is running
+	for {
+
+		// Get all processes
+		processes, err := process.Processes()
+		if err != nil {
+			log.Errorf("Error getting processes:", err)
+			return
+		}
+
+		// Check if {targetProcessName} is running
+		for _, p := range processes {
+			name, err := p.Name()
+
+			if err == nil && name == targetProcessName {
+				log.Info("Albion is running.")
+				found <- true
+				return
+			}
+		}
+
+		// Check again every n seconds
+		time.Sleep(time.Duration(albionProcessTimeBetweenChecks) * time.Second)
+	}
+
+}
+
 func onReady() {
+
+	found := make(chan bool)
+	go findAlbionProcess(found)
+	<-found
+
 	// Don't hide the console automatically
 	// Unless started from the scheduled task or with the parameter
 	// People think it is crashing

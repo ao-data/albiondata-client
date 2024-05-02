@@ -7,6 +7,8 @@ import (
 	"fmt"
 	"os"
 
+	"golang.org/x/sys/windows"
+
 	"github.com/ao-data/albiondata-client/client"
 
 	"time"
@@ -15,7 +17,6 @@ import (
 	"github.com/ao-data/albiondata-client/log"
 	"github.com/getlantern/systray"
 	"github.com/gonutz/w32"
-	"github.com/shirou/gopsutil/process"
 )
 
 var consoleHidden bool
@@ -63,6 +64,9 @@ func onExit() {
 const targetProcessName string = "Albion-Online.exe"
 const albionProcessTimeBetweenChecks int = 5
 
+// unsafe.Sizeof(windows.ProcessEntry32{})
+const processEntrySize = 568 // this will only work on 64bit
+
 // Gets all processes periodically and stops when albion is found running.
 func findAlbionProcess(found chan<- bool) {
 
@@ -70,19 +74,24 @@ func findAlbionProcess(found chan<- bool) {
 
 	// Endless loop to check periodically if {targetProcessName} process is running
 	for {
-
-		// Get all processes
-		processes, err := process.Processes()
+		// Get a snapshot of all running processes
+		handle, err := windows.CreateToolhelp32Snapshot(windows.TH32CS_SNAPPROCESS, 0)
 		if err != nil {
-			log.Errorf("Error getting processes:", err)
+			log.Error("Error getting processes:", err)
 			return
 		}
 
-		// Check if {targetProcessName} is running
-		for _, p := range processes {
-			name, err := p.Name()
+		p := windows.ProcessEntry32{Size: processEntrySize}
 
-			if err == nil && name == targetProcessName {
+		for {
+			e := windows.Process32Next(handle, &p)
+			if e != nil {
+				// No more processes
+				break
+			}
+
+			// Check if {targetProcessName} is running
+			if windows.UTF16ToString(p.ExeFile[:]) == targetProcessName {
 				log.Info("Albion is running.")
 				found <- true
 				return

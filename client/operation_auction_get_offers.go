@@ -5,6 +5,7 @@ import (
 
 	"github.com/ao-data/albiondata-client/lib"
 	"github.com/ao-data/albiondata-client/log"
+	"github.com/google/uuid"
 )
 
 type operationAuctionGetOffers struct {
@@ -52,10 +53,13 @@ func (op operationAuctionGetOffersResponse) Process(state *albionState) {
 		return
 	}
 
+	identifier, _ := uuid.NewRandom()
+
 	upload := lib.MarketUpload{
 		Orders: orders,
+		Identifier: identifier.String(),
 	}
 
-	log.Infof("Sending %d live market sell orders to ingest", len(orders))
+	log.Infof("Sending %d live market sell orders to ingest (Identifier: %s)", len(orders), identifier)
 	sendMsgToPublicUploaders(upload, lib.NatsMarketOrdersIngest, state)
 }

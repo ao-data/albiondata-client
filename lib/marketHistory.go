@@ -53,4 +53,5 @@ type MarketHistoriesUpload struct {
 	QualityLevel uint8            `json:"QualityLevel"`
 	Timescale    Timescale        `json:"Timescale"`
 	Histories    []*MarketHistory `json:"MarketHistories"`
+	Identifier string `json:"Identifier"`
 }

@@ -1,13 +1,14 @@
 package client
 
 import (
+	"strings"
+
 	"github.com/ao-data/albiondata-client/lib"
 	"github.com/ao-data/albiondata-client/log"
 	"github.com/ao-data/albiondata-client/notification"
-	"strings"
 )
 
-//CacheSize limit size of messages in cache
+// CacheSize limit size of messages in cache
 const CacheSize = 8192
 
 type marketHistoryInfo struct {
@@ -17,13 +18,14 @@ type marketHistoryInfo struct {
 }
 
 type albionState struct {
-	LocationId     int
-	LocationString string
-	CharacterId    lib.CharacterID
-	CharacterName  string
-	GameServerIP   string
-	AODataServerID int
-	AODataIngestBaseURL string
+	LocationId           int
+	LocationString       string
+	CharacterId          lib.CharacterID
+	CharacterName        string
+	GameServerIP         string
+	AODataServerID       int
+	AODataIngestBaseURL  string
+	WaitingForMarketData bool
 
 	// A lot of information is sent out but not contained in the response when requesting marketHistory (e.g. ID)
 	// This information is stored in marketHistoryInfo

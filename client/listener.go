@@ -170,7 +170,6 @@ func (l *listener) processPacket(packet gopacket.Packet) {
 
 	layer := packet.Layer(photon.PhotonLayerType)
 
-
 	if layer == nil {
 		return
 	}
@@ -206,6 +205,12 @@ func (l *listener) onReliableCommand(command *photon.PhotonCommand) {
 
 	msg, err := command.ReliableMessage()
 	if err != nil {
+
+		if fmt.Sprint(err) == "Encryption not supported" && l.router.albionstate.WaitingForMarketData == true {
+			l.router.albionstate.WaitingForMarketData = false
+			log.Info("Market data is encrypted. Please see https://discord.com/channels/336216450689794048/586173260564267028 for more information.")
+		}
+
 		if !ConfigGlobal.DebugIgnoreDecodingErrors {
 			log.Debugf("Could not decode reliable message: %v - %v", err, base64.StdEncoding.EncodeToString(command.Data))
 		}

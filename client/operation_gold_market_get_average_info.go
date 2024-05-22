@@ -3,7 +3,7 @@ package client
 import (
 	"github.com/ao-data/albiondata-client/lib"
 	"github.com/ao-data/albiondata-client/log"
-	"github.com/google/uuid"
+	uuid "github.com/nu7hatch/gouuid"
 )
 
 type operationGoldMarketGetAverageInfo struct {
@@ -21,7 +21,7 @@ type operationGoldMarketGetAverageInfoResponse struct {
 func (op operationGoldMarketGetAverageInfoResponse) Process(state *albionState) {
 	log.Debug("Got response to GoldMarketGetAverageInfo operation...")
 
-	identifier, _ := uuid.NewRandom()
+	identifier, _ := uuid.NewV4()
 
 	upload := lib.GoldPricesUpload{
 		Prices:     op.GoldPrices,

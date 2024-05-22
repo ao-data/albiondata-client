@@ -1,0 +1,14 @@
+version: "3.5"
+
+services:
+  builder:
+    # image: golang:1.16.6-buster
+    platform: linux/amd64
+    build:
+      context: ./
+    volumes:
+      - .:/go/src/github.com/ao-data/albiondata-client
+    stdin_open: true
+    tty: true
+    entrypoint: 'sleep infinity'
+    

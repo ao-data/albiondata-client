@@ -5,7 +5,7 @@ import (
 
 	"github.com/ao-data/albiondata-client/lib"
 	"github.com/ao-data/albiondata-client/log"
-	"github.com/google/uuid"
+	uuid "github.com/nu7hatch/gouuid"
 )
 
 type operationAuctionGetOffers struct {
@@ -53,10 +53,10 @@ func (op operationAuctionGetOffersResponse) Process(state *albionState) {
 		return
 	}
 
-	identifier, _ := uuid.NewRandom()
+	identifier, _ := uuid.NewV4()
 
 	upload := lib.MarketUpload{
-		Orders: orders,
+		Orders:     orders,
 		Identifier: identifier.String(),
 	}
 

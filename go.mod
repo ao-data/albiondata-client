@@ -23,13 +23,12 @@ require (
 	github.com/fsnotify/fsnotify v1.4.9 // indirect
 	github.com/getlantern/golog v0.0.0-20201022140317-a8d13dc71777 // indirect
 	github.com/getlantern/ops v0.0.0-20200403153110-8476b16edcd6 // indirect
-	github.com/google/uuid v1.6.0
 	github.com/hashicorp/golang-lru v0.5.4 // indirect
 	github.com/magiconair/properties v1.8.4 // indirect
 	github.com/nats-io/gnatsd v1.4.1 // indirect
 	github.com/nats-io/nkeys v0.2.0 // indirect
 	github.com/nats-io/nuid v1.0.1 // indirect
-	github.com/nu7hatch/gouuid v0.0.0-20131221200532-179d4d0c4d8d // indirect
+	github.com/nu7hatch/gouuid v0.0.0-20131221200532-179d4d0c4d8d
 	github.com/pelletier/go-toml v1.8.1 // indirect
 	github.com/spf13/afero v1.4.1 // indirect
 	github.com/spf13/cast v1.3.1 // indirect

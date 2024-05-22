@@ -13,6 +13,10 @@ go install github.com/tc-hib/go-winres@v0.3.1
 
 export PATH="$PATH:/root/go/bin"
 
+go mod init
+
+go mod download
+
 go-winres make
 
 env GOOS=windows GOARCH=amd64 go build -ldflags "-s -w -X main.version=$GITHUB_REF_NAME" -o albiondata-client.exe -v -x albiondata-client.go

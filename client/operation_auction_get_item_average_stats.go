@@ -5,7 +5,7 @@ import (
 
 	"github.com/ao-data/albiondata-client/lib"
 	"github.com/ao-data/albiondata-client/log"
-	"github.com/google/uuid"
+	uuid "github.com/nu7hatch/gouuid"
 )
 
 type operationAuctionGetItemAverageStats struct {
@@ -89,7 +89,7 @@ func (op operationAuctionGetItemAverageStatsResponse) Process(state *albionState
 		return histories[i].Timestamp > histories[j].Timestamp
 	})
 
-	identifier, _ := uuid.NewRandom()
+	identifier, _ := uuid.NewV4()
 
 	upload := lib.MarketHistoriesUpload{
 		AlbionId:     mhInfo.albionId,
@@ -97,7 +97,7 @@ func (op operationAuctionGetItemAverageStatsResponse) Process(state *albionState
 		QualityLevel: mhInfo.quality,
 		Timescale:    mhInfo.timescale,
 		Histories:    histories,
-		Identifier: identifier.String(),
+		Identifier:   identifier.String(),
 	}
 
 	log.Infof("Sending %d market history item average stats to ingest for albionID %d (Identifier: %s)", len(histories), mhInfo.albionId, identifier)

@@ -43,9 +43,6 @@ github.com/google/go-querystring/query
 github.com/google/gopacket
 github.com/google/gopacket/layers
 github.com/google/gopacket/pcap
-# github.com/google/uuid v1.6.0
-## explicit
-github.com/google/uuid
 # github.com/gorilla/websocket v1.4.2
 ## explicit
 github.com/gorilla/websocket

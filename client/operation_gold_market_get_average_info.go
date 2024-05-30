@@ -21,14 +21,12 @@ type operationGoldMarketGetAverageInfoResponse struct {
 func (op operationGoldMarketGetAverageInfoResponse) Process(state *albionState) {
 	log.Debug("Got response to GoldMarketGetAverageInfo operation...")
 
-	identifier, _ := uuid.NewV4()
-
 	upload := lib.GoldPricesUpload{
 		Prices:     op.GoldPrices,
 		TimeStamps: op.TimeStamps,
-		Identifier: identifier.String(),
 	}
 
+	identifier, _ := uuid.NewV4()
 	log.Infof("Sending gold prices to ingest (Identifier: %s)", identifier)
-	sendMsgToPublicUploaders(upload, lib.NatsGoldPricesIngest, state)
+	sendMsgToPublicUploaders(upload, lib.NatsGoldPricesIngest, state, identifier.String())
 }

@@ -21,7 +21,9 @@ func newNATSUploader(url string) uploader {
 	}
 }
 
-func (u *natsUploader) sendToIngest(body []byte, topic string, state *albionState) {
+func (u *natsUploader) sendToIngest(body []byte, topic string, state *albionState, identifier string) {
+	// not handling sending identifier since the official usage is with http_pow
+
 	if err := u.nc.Publish(topic, body); err != nil {
 		log.Errorf("Error while sending ingest to nats with data: %v", err)
 	}

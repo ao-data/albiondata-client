@@ -82,5 +82,4 @@ type MarketNotificationUpload struct {
 // MarketUpload contains a list of orders
 type MarketUpload struct {
 	Orders []*MarketOrder `json:"Orders"`
-	Identifier string `json:"Identifier"`
 }

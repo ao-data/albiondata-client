@@ -9,7 +9,6 @@ import (
 type GoldPricesUpload struct {
 	Prices     []int   `json:"Prices"`
 	TimeStamps []int64 `json:"Timestamps"`
-	Identifier string `json:"Identifier"`
 }
 
 func (g *GoldPricesUpload) StringArrays() [][]string {

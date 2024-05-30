@@ -5,6 +5,7 @@ import (
 
 	"github.com/ao-data/albiondata-client/lib"
 	"github.com/ao-data/albiondata-client/log"
+	uuid "github.com/nu7hatch/gouuid"
 )
 
 type operationGetClusterMapInfo struct {
@@ -47,6 +48,7 @@ func (op operationGetClusterMapInfoResponse) Process(state *albionState) {
 		BuyPrice:        op.BuyPrice,
 	}
 
-	log.Info("Sending map data to ingest")
-	sendMsgToPublicUploaders(upload, lib.NatsMapDataIngest, state)
+	identifier, _ := uuid.NewV4()
+	log.Info("Sending map data to ingest (Identifier: %s)", identifier)
+	sendMsgToPublicUploaders(upload, lib.NatsMapDataIngest, state, identifier.String())
 }

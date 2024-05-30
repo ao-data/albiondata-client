@@ -6,6 +6,7 @@ import (
 
 	"github.com/ao-data/albiondata-client/lib"
 	"github.com/ao-data/albiondata-client/log"
+	uuid "github.com/nu7hatch/gouuid"
 )
 
 type operationReadMail struct {
@@ -44,7 +45,8 @@ func (op operationReadMail) Process(state *albionState) {
 		Notification: notification,
 	}
 
-	sendMsgToPrivateUploaders(&upload, lib.NatsMarketNotifications, state)
+	identifier, _ := uuid.NewV4()
+	sendMsgToPrivateUploaders(&upload, lib.NatsMarketNotifications, state, identifier.String())
 }
 
 func decodeSellNotification(op operationReadMail, body []string) lib.MarketNotification {

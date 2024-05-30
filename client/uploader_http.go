@@ -22,7 +22,9 @@ func newHTTPUploader(url string) uploader {
 	}
 }
 
-func (u *httpUploader) sendToIngest(body []byte, topic string, state *albionState) {
+func (u *httpUploader) sendToIngest(body []byte, topic string, state *albionState, identifier string) {
+	// not handling sending identifier since the official usage is with http_pow
+
 	client := &http.Client{Transport: u.transport}
 
 	fullURL := u.baseURL + "/" + topic

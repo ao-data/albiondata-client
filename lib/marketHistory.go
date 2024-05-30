@@ -48,10 +48,9 @@ func (m *MarketHistory) StringArray() []string {
 }
 
 type MarketHistoriesUpload struct {
-	AlbionId     int32           `json:"AlbionId"`
+	AlbionId     int32            `json:"AlbionId"`
 	LocationId   int              `json:"LocationId"`
 	QualityLevel uint8            `json:"QualityLevel"`
 	Timescale    Timescale        `json:"Timescale"`
 	Histories    []*MarketHistory `json:"MarketHistories"`
-	Identifier string `json:"Identifier"`
 }

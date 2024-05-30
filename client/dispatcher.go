@@ -10,7 +10,7 @@ import (
 	"github.com/ao-data/albiondata-client/log"
 )
 
-type dispatcher struct {}
+type dispatcher struct{}
 
 var (
 	wsHub *WSHub
@@ -52,7 +52,7 @@ func createUploaders(targets []string) []uploader {
 	return uploaders
 }
 
-func sendMsgToPublicUploaders(upload interface{}, topic string, state *albionState) {
+func sendMsgToPublicUploaders(upload interface{}, topic string, state *albionState, identifier string) {
 	data, err := json.Marshal(upload)
 	if err != nil {
 		log.Errorf("Error while marshalling payload for %v: %v", err, topic)
@@ -66,12 +66,11 @@ func sendMsgToPublicUploaders(upload interface{}, topic string, state *albionSta
 		PublicIngestBaseUrls = strings.Replace(PublicIngestBaseUrls, "http+pow://albion-online-data.com", state.AODataIngestBaseURL, -1)
 	}
 
-
 	var publicUploaders = createUploaders(strings.Split(PublicIngestBaseUrls, ","))
 	var privateUploaders = createUploaders(strings.Split(ConfigGlobal.PrivateIngestBaseUrls, ","))
 
-	sendMsgToUploaders(data, topic, publicUploaders, state)
-	sendMsgToUploaders(data, topic, privateUploaders, state)
+	sendMsgToUploaders(data, topic, publicUploaders, state, identifier)
+	sendMsgToUploaders(data, topic, privateUploaders, state, identifier)
 
 	// If websockets are enabled, send the data there too
 	if ConfigGlobal.EnableWebsockets {
@@ -79,7 +78,7 @@ func sendMsgToPublicUploaders(upload interface{}, topic string, state *albionSta
 	}
 }
 
-func sendMsgToPrivateUploaders(upload lib.PersonalizedUpload, topic string, state *albionState) {
+func sendMsgToPrivateUploaders(upload lib.PersonalizedUpload, topic string, state *albionState, identifier string) {
 	if ConfigGlobal.DisableUpload {
 		log.Info("Upload is disabled.")
 		return
@@ -103,7 +102,7 @@ func sendMsgToPrivateUploaders(upload lib.PersonalizedUpload, topic string, stat
 
 	var privateUploaders = createUploaders(strings.Split(ConfigGlobal.PrivateIngestBaseUrls, ","))
 	if len(privateUploaders) > 0 {
-		sendMsgToUploaders(data, topic, privateUploaders, state)
+		sendMsgToUploaders(data, topic, privateUploaders, state, identifier)
 	}
 
 	// If websockets are enabled, send the data there too
@@ -112,14 +111,14 @@ func sendMsgToPrivateUploaders(upload lib.PersonalizedUpload, topic string, stat
 	}
 }
 
-func sendMsgToUploaders(msg []byte, topic string, uploaders []uploader,  state *albionState) {
+func sendMsgToUploaders(msg []byte, topic string, uploaders []uploader, state *albionState, identifier string) {
 	if ConfigGlobal.DisableUpload {
 		log.Info("Upload is disabled.")
 		return
 	}
 
 	for _, u := range uploaders {
-		u.sendToIngest(msg, topic, state)
+		u.sendToIngest(msg, topic, state, identifier)
 	}
 }
 

@@ -53,13 +53,11 @@ func (op operationAuctionGetOffersResponse) Process(state *albionState) {
 		return
 	}
 
-	identifier, _ := uuid.NewV4()
-
 	upload := lib.MarketUpload{
-		Orders:     orders,
-		Identifier: identifier.String(),
+		Orders: orders,
 	}
 
+	identifier, _ := uuid.NewV4()
 	log.Infof("Sending %d live market sell orders to ingest (Identifier: %s)", len(orders), identifier)
-	sendMsgToPublicUploaders(upload, lib.NatsMarketOrdersIngest, state)
+	sendMsgToPublicUploaders(upload, lib.NatsMarketOrdersIngest, state, identifier.String())
 }

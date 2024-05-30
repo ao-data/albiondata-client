@@ -5,6 +5,7 @@ import (
 
 	"github.com/ao-data/albiondata-client/lib"
 	"github.com/ao-data/albiondata-client/log"
+	uuid "github.com/nu7hatch/gouuid"
 )
 
 type eventSkillData struct {
@@ -43,6 +44,7 @@ func (event eventSkillData) Process(state *albionState) {
 		Skills: skills,
 	}
 
+	identifier, _ := uuid.NewV4()
 	log.Infof("Sending %d skills of %v to ingest", len(skills), state.CharacterName)
-	sendMsgToPrivateUploaders(&upload, lib.NatsSkillData, state)
+	sendMsgToPrivateUploaders(&upload, lib.NatsSkillData, state, identifier.String())
 }

@@ -27,9 +27,6 @@ func isInterfacePresent(_interface string) bool {
 func parseGivenInterfaces(interfaces string) []string {
 	// Split the input string by comma
 	outInterfaces := strings.Split(interfaces, ",")
-	if outInterfaces == nil {
-		log.Fatalf("Interfaces with name: %v not found, when parsed: %v", interfaces, outInterfaces)
-	}
 
 	for i, _interface := range outInterfaces {
 		if !isInterfacePresent(_interface) {

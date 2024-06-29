@@ -4,9 +4,10 @@
 package client
 
 import (
-	"log"
 	"net"
 	"strings"
+
+	"github.com/ao-data/albiondata-client/log"
 )
 
 // Check if the interface is detected
@@ -27,7 +28,15 @@ func parseGivenInterfaces(interfaces string) []string {
 	// Split the input string by comma
 	outInterfaces := strings.Split(interfaces, ",")
 	if outInterfaces == nil {
-		log.Fatal("Interfaces with name: %v not found, when parsed: %v", interfaces, outInterfaces)
+		log.Fatalf("Interfaces with name: %v not found, when parsed: %v", interfaces, outInterfaces)
+	}
+
+	for i, _interface := range outInterfaces {
+		if !isInterfacePresent(_interface) {
+			log.Debugf("Interface with name: %v not found, removing from list ...", _interface)
+			// remove the interface from the list
+			outInterfaces = append(outInterfaces[:i], outInterfaces[i+1:]...)
+		}
 	}
 
 	return outInterfaces
@@ -37,7 +46,7 @@ func parseGivenInterfaces(interfaces string) []string {
 func getAllPhysicalInterface() []string {
 	interfaces, err := net.Interfaces()
 	if err != nil {
-		log.Fatal("Failed to get interfaces: %v", err)
+		log.Fatalf("Failed to get interfaces: %v", err)
 	}
 
 	var outInterfaces []string

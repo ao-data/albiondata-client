@@ -24,11 +24,7 @@ func newAlbionProcessWatcher() *albionProcessWatcher {
 
 func (apw *albionProcessWatcher) run() error {
 	log.Print("Watching Albion")
-	if ConfigGlobal.ListenDevices != "" {
-		apw.devices = parseGivenInterfaces(ConfigGlobal.ListenDevices)
-	} else {
-		apw.devices = getAllPhysicalInterface()
-	}
+	apw.devices = getAllPhysicalInterface()
 	log.Debugf("Will listen to these devices: %v", apw.devices)
 	go apw.r.run()
 

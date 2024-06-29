@@ -44,6 +44,9 @@ func parseGivenInterfaces(interfaces string) []string {
 
 // Gets all physical interfaces based on filter results, ignoring all VM, Loopback and Tunnel interfaces.
 func getAllPhysicalInterface() []string {
+	if ConfigGlobal.ListenDevices != "" {
+		return parseGivenInterfaces(ConfigGlobal.ListenDevices)
+	}
 	interfaces, err := net.Interfaces()
 	if err != nil {
 		log.Fatalf("Failed to get interfaces: %v", err)

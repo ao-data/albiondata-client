@@ -24,7 +24,7 @@ func newAlbionProcessWatcher() *albionProcessWatcher {
 
 func (apw *albionProcessWatcher) run() error {
 	log.Print("Watching Albion")
-	apw.devices = getAllPhysicalInterface()
+	apw.devices, _ = getAllPhysicalInterface()
 	log.Debugf("Will listen to these devices: %v", apw.devices)
 	go apw.r.run()
 

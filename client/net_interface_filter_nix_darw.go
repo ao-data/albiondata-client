@@ -24,7 +24,7 @@ func isInterfacePresent(_interface string) bool {
 	return false
 }
 
-func parseGivenInterfaces(interfaces string) []string {
+func parseGivenInterfaces(interfaces string) ([]string, error) {
 	// Split the input string by comma
 	outInterfaces := strings.Split(interfaces, ",")
 
@@ -36,11 +36,11 @@ func parseGivenInterfaces(interfaces string) []string {
 		}
 	}
 
-	return outInterfaces
+	return outInterfaces, nil
 }
 
 // Gets all physical interfaces based on filter results, ignoring all VM, Loopback and Tunnel interfaces.
-func getAllPhysicalInterface() []string {
+func getAllPhysicalInterface() ([]string, error) {
 	if ConfigGlobal.ListenDevices != "" {
 		return parseGivenInterfaces(ConfigGlobal.ListenDevices)
 	}
@@ -57,5 +57,5 @@ func getAllPhysicalInterface() []string {
 		}
 	}
 
-	return outInterfaces
+	return outInterfaces, nil
 }

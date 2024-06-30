@@ -1,6 +1,8 @@
 # .github/workflows/test-build.yaml
 
-on: push
+on: 
+  push:
+  pull_request:
 
 jobs:
   build-linux:

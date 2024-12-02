@@ -157,7 +157,7 @@ func (config *config) setupCommonFlags() {
 		&config.ListenDevices,
 		"l",
 		"",
-		"Listen on this comma separated devices instead of all available",
+		"Listen on this comma separated devices instead of all available. (Windows: Use MAC-Address, Linux: Use interface name)",
 	)
 
 	flag.BoolVar(

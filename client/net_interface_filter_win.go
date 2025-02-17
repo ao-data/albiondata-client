@@ -108,7 +108,7 @@ func getAllPhysicalInterface() ([]string, error) {
 		}
 		name := "\\Device\\NPF_" + bytePtrToString(pa.AdapterName)
 
-		if pa.IfType != uint32(IF_TYPE_SOFTWARE_LOOPBACK) && pa.IfType != uint32(IF_TYPE_TUNNEL) &&
+		if pa.IfType != uint32(IF_TYPE_SOFTWARE_LOOPBACK) &&
 			pa.OperStatus == uint32(IfOperStatusUp) && isPhysicalInterface(mac) {
 			outInterfaces = append(outInterfaces, name)
 		}

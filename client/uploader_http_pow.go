@@ -40,7 +40,7 @@ func newHTTPUploaderPow(url string) uploader {
 	}
 
 	return &httpUploaderPow{
-		baseURL:   strings.Replace(url, "http+pow", "http", -1),
+		baseURL:   strings.Replace(url, "http+pow", "https", -1),
 		transport: &http.Transport{},
 	}
 }

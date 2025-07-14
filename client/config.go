@@ -42,8 +42,11 @@ type config struct {
 
 // config global config data
 var ConfigGlobal = &config{
-	LogLevel: "INFO",
+	LogLevel:             "INFO",
+	PublicIngestBaseUrls: "http+pow://albion-online-data.com",
 }
+
+var PublicIngestBaseUrlsWasSet bool
 
 func (config *config) SetupFlags() {
 	config.setupWebsocketFlags()
@@ -188,12 +191,11 @@ func (config *config) setupCommonFlags() {
 		"Automatically minimize the window.",
 	)
 
-	flag.StringVar(
-		&config.PublicIngestBaseUrls,
-		"i",
-		"http+pow://albion-online-data.com",
-		"Base URL to send PUBLIC data to, can be 'nats://', 'http://' or 'noop' and can have multiple uploaders. Comma separated.",
-	)
+	flag.Func("i", "Base URL to send PUBLIC data to, can be 'nats://', 'http://' or 'noop' and can have multiple uploaders. Comma separated.", func(value string) error {
+		config.PublicIngestBaseUrls = value
+		PublicIngestBaseUrlsWasSet = true
+		return nil
+	})
 
 	flag.StringVar(
 		&config.PrivateIngestBaseUrls,

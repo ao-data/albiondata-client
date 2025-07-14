@@ -39,8 +39,12 @@ func newHTTPUploaderPow(url string) uploader {
 		runtime.GOMAXPROCS(procs)
 	}
 
+	if !PublicIngestBaseUrlsWasSet {
+		url = strings.Replace(url, "http+pow://", "https://", 1)
+	}
+
 	return &httpUploaderPow{
-		baseURL:   strings.Replace(url, "http+pow", "https", -1),
+		baseURL:   strings.Replace(url, "http+pow", "http", 1),
 		transport: &http.Transport{},
 	}
 }

@@ -38,15 +38,6 @@ func createUploaders(targets []string) []uploader {
 			continue
 		}
 
-		/**
-		* If the target starts with http://, we replace it with https://
-		* This is to ensure that we always use HTTPS for security reasons.
-		* But lets Pow targets start with http+pow://, so we don't replace those.
-		 */
-		if strings.HasPrefix(target, "http://") {
-			target = "https://" + strings.TrimPrefix(target, "http://")
-		}
-
 		if target[0:8] == "http+pow" {
 			uploaders = append(uploaders, newHTTPUploaderPow(target))
 		} else if target[0:4] == "http" {

@@ -10,3 +10,7 @@ _vendor-[0-9]*
 scripts/albiondata-client
 albiondata-client-output.txt
 config.yaml
+albiondata-client.exe.bak
+go.mod
+rsrc_windows_386.syso
+rsrc_windows_amd64.syso

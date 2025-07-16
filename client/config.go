@@ -35,7 +35,7 @@ type config struct {
 	OfflinePath                    string
 	RecordPath                     string
 	PrivateIngestBaseUrls          string
-	PublicIngestBaseUrls           string
+	ParticipatePublicData          bool
 	NoCPULimit                     bool
 	PrintVersion                   bool
 }
@@ -55,15 +55,8 @@ func (config *config) SetupFlags() {
 	if config.OfflinePath != "" {
 		config.Offline = true
 		config.DisableUpload = true
-
-		if config.PublicIngestBaseUrls == "http+pow://west.aodp.local:3000" {
-			config.DisableUpload = false
-		}
-
-		log.Infof("config.PublicIngestBaseUrls: %v", config.PublicIngestBaseUrls)
 		log.Infof("config.DisableUpload: %v", config.DisableUpload)
 	}
-
 	if config.DisableUpload {
 		log.Info("Upload is disabled.")
 	}
@@ -188,11 +181,11 @@ func (config *config) setupCommonFlags() {
 		"Automatically minimize the window.",
 	)
 
-	flag.StringVar(
-		&config.PublicIngestBaseUrls,
-		"i",
-		"https+pow://albion-online-data.com",
-		"Base URL to send PUBLIC data to, can be 'nats://', 'http://', 'https://' or 'noop' and can have multiple uploaders. Comma separated.",
+	flag.BoolVar(
+		&config.ParticipatePublicData,
+		"public-data",
+		true,
+		"Participate in public data project (submit to public POW server)",
 	)
 
 	flag.StringVar(

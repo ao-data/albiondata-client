@@ -59,9 +59,15 @@ func sendMsgToPublicUploaders(upload interface{}, topic string, state *albionSta
 		return
 	}
 
+	var PublicIngestBaseUrls = ConfigGlobal.PublicIngestBaseUrls
+	if isUsingDefaultPublicIngestBaseUrls(PublicIngestBaseUrls) {
+		// we replace the placeholder with the correct one based on the serverID from albionState
+		PublicIngestBaseUrls = strings.Replace(PublicIngestBaseUrls, "https+pow://albion-online-data.com", state.AODataIngestBaseURL, -1)
+	}
+
 	var publicUploaders []Uploader
 	if ConfigGlobal.ParticipatePublicData {
-		publicUploaders = createUploaders([]string{state.AODataIngestBaseURL})
+		publicUploaders = createUploaders(strings.Split(PublicIngestBaseUrls, ","))
 	}
 	var privateUploaders = createUploaders(strings.Split(ConfigGlobal.PrivateIngestBaseUrls, ","))
 
@@ -72,6 +78,11 @@ func sendMsgToPublicUploaders(upload interface{}, topic string, state *albionSta
 	if ConfigGlobal.EnableWebsockets {
 		sendMsgToWebSockets(data, topic)
 	}
+}
+
+func isUsingDefaultPublicIngestBaseUrls(publicIngestBaseUrls string) bool {
+	var defaultPublicIngestBaseUrls = "https+pow://albion-online-data.com"
+	return strings.Contains(publicIngestBaseUrls, defaultPublicIngestBaseUrls)
 }
 
 func sendMsgToPrivateUploaders(upload lib.PersonalizedUpload, topic string, state *albionState, identifier string) {

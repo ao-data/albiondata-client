@@ -35,6 +35,7 @@ type config struct {
 	OfflinePath                    string
 	RecordPath                     string
 	PrivateIngestBaseUrls          string
+	PublicIngestBaseUrls           string
 	ParticipatePublicData          bool
 	NoCPULimit                     bool
 	PrintVersion                   bool
@@ -55,8 +56,15 @@ func (config *config) SetupFlags() {
 	if config.OfflinePath != "" {
 		config.Offline = true
 		config.DisableUpload = true
+		
+		if config.PublicIngestBaseUrls == "http+pow://west.aodp.local:3000" {
+			config.DisableUpload = false
+		}
+
+		log.Infof("config.PublicIngestBaseUrls: %v", config.PublicIngestBaseUrls)
 		log.Infof("config.DisableUpload: %v", config.DisableUpload)
 	}
+	
 	if config.DisableUpload {
 		log.Info("Upload is disabled.")
 	}
@@ -151,6 +159,13 @@ func (config *config) setupCommonFlags() {
 		"d",
 		false,
 		"If specified no attempts will be made to upload data to remote server.",
+	)
+	
+	flag.StringVar(
+		&config.PublicIngestBaseUrls,
+		"i",
+		"",
+		"Base URL to send PUBLIC data to, can be 'nats://', 'http://', 'https://' or 'noop' and can have multiple uploaders. Comma separated.",
 	)
 
 	flag.StringVar(

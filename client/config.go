@@ -36,7 +36,7 @@ type config struct {
 	RecordPath                     string
 	PrivateIngestBaseUrls          string
 	PublicIngestBaseUrls           string
-	ParticipatePublicData          bool
+	ParticipateInAODataProject     bool
 	NoCPULimit                     bool
 	PrintVersion                   bool
 }
@@ -56,7 +56,7 @@ func (config *config) SetupFlags() {
 	if config.OfflinePath != "" {
 		config.Offline = true
 		config.DisableUpload = true
-		
+
 		if config.PublicIngestBaseUrls == "http+pow://west.aodp.local:3000" {
 			config.DisableUpload = false
 		}
@@ -64,7 +64,7 @@ func (config *config) SetupFlags() {
 		log.Infof("config.PublicIngestBaseUrls: %v", config.PublicIngestBaseUrls)
 		log.Infof("config.DisableUpload: %v", config.DisableUpload)
 	}
-	
+
 	if config.DisableUpload {
 		log.Info("Upload is disabled.")
 	}
@@ -160,7 +160,7 @@ func (config *config) setupCommonFlags() {
 		false,
 		"If specified no attempts will be made to upload data to remote server.",
 	)
-	
+
 	flag.StringVar(
 		&config.PublicIngestBaseUrls,
 		"i",
@@ -197,10 +197,10 @@ func (config *config) setupCommonFlags() {
 	)
 
 	flag.BoolVar(
-		&config.ParticipatePublicData,
-		"public-data",
+		&config.ParticipateInAODataProject,
+		"public-upload",
 		true,
-		"Participate in public data project (submit to public POW server)",
+		"Send your public data to the AO Data Project server so every player can benefit from it.",
 	)
 
 	flag.StringVar(

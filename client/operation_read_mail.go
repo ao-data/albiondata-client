@@ -27,11 +27,11 @@ func (op operationReadMail) Process(state *albionState) {
 		return
 	}
 
-	if mailInfo.OrderType == "MARKETPLACE_SELLORDER_FINISHED_SUMMARY" {
+	switch mailInfo.OrderType {
+	case "MARKETPLACE_SELLORDER_FINISHED_SUMMARY":
 		log.Debug("Read finished sell order.")
 		notification = decodeSellNotification(op, body)
-
-	} else if mailInfo.OrderType == "MARKETPLACE_SELLORDER_EXPIRED_SUMMARY" {
+	case "MARKETPLACE_SELLORDER_EXPIRED_SUMMARY":
 		log.Debug("Read expired sell order.")
 		notification = decodeExpiryNotification(op, body)
 	}

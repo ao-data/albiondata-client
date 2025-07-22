@@ -6,9 +6,8 @@ import (
 )
 
 type natsUploader struct {
-	isPrivate bool
-	url       string
-	nc        *nats.Conn
+	url string
+	nc  *nats.Conn
 }
 
 // newNATSUploader creates a new NATS uploader

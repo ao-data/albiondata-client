@@ -1,9 +1,10 @@
-// +build darwin
+//go:build darwin
 
 package client
 
 import (
 	"net"
+	"strings"
 )
 
 // Gets all physical interfaces based on filter results, ignoring all VM, Loopback and Tunnel interfaces.
@@ -14,10 +15,23 @@ func getAllPhysicalInterface() ([]string, error) {
 	}
 
 	var outInterfaces []string
+	wantedDevices := strings.Split(ConfigGlobal.ListenDevices, ",")
 
-	for _, _interface := range interfaces {
-		if _interface.Flags&net.FlagLoopback == 0 && _interface.Flags&net.FlagUp == 1 && isPhysicalInterface(_interface.HardwareAddr.String()) {
-			outInterfaces = append(outInterfaces, _interface.Name)
+	if ConfigGlobal.ListenDevices != "" && len(wantedDevices) > 0 {
+		for _, wanted := range wantedDevices {
+			for _, iface := range interfaces {
+				if iface.Name == strings.TrimSpace(wanted) {
+					outInterfaces = append(outInterfaces, iface.Name)
+				}
+			}
+		}
+	} else {
+		for _, iface := range interfaces {
+			if iface.Flags&net.FlagLoopback == 0 &&
+				iface.Flags&net.FlagUp != 0 &&
+				isPhysicalInterface(iface.HardwareAddr.String()) {
+				outInterfaces = append(outInterfaces, iface.Name)
+			}
 		}
 	}
 

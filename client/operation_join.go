@@ -27,14 +27,10 @@ func (op operationJoinResponse) Process(state *albionState) {
 	state.AODataServerID = 0
 
 	// Hack for second caerleon marketplace
-	if strings.HasSuffix(op.Location, "-Auction2") {
-		op.Location = strings.Replace(op.Location, "-Auction2", "", -1)
-	}
+	op.Location = strings.Replace(op.Location, "-Auction2", "", -1)
 
 	// Allow for smugglers rest locations markets to be parsed by setting a valid location int
-	if strings.HasPrefix(op.Location, "BLACKBANK-") {
-		op.Location = strings.Replace(op.Location, "BLACKBANK-", "", -1)
-	}
+	op.Location = strings.Replace(op.Location, "BLACKBANK-", "", -1)
 
 	loc, err := strconv.Atoi(op.Location)
 	if err != nil {

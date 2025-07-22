@@ -24,11 +24,12 @@ func processOffline(path string) {
 	l := newListener(r)
 
 	fileExtension := filepath.Ext(path)
-	if fileExtension == ".pcap" {
+	switch fileExtension {
+	case ".pcap":
 		l.startOfflinePcap(path)
-	} else if fileExtension == ".gob" {
+	case ".gob":
 		l.startOfflineCommandGob(path)
-	} else {
+	default:
 		log.Error("Only .pcap and .gob files supported at this time.")
 	}
 }

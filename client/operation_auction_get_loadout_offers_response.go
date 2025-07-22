@@ -9,40 +9,45 @@ import (
 )
 
 type operationAuctionGetLoadoutOffersResponse struct {
-	MarketOrders [][]string `mapstructure:"1"`
-	Quantities   [][]int    `mapstructure:"2"`
+	LoadoutOrders     [][]string `mapstructure:"1"`
+	LoadoutQuantities [][]int    `mapstructure:"2"`
 }
 
 func (op operationAuctionGetLoadoutOffersResponse) Process(state *albionState) {
-	log.Infof("Got response to AuctionGetOffers operation...")
-
 	if !state.IsValidLocation() {
 		return
 	}
 
+	var orders = parseLoadoutOrders(op.LoadoutOrders, state)
+
+	if len(orders) < 1 {
+		return
+	}
+
+	uploadOrders(orders, state)
+}
+
+func uploadOrders(orders []*lib.MarketOrder, state *albionState) {
+	identifier, _ := uuid.NewV4()
+	log.Infof("Sending %d loadout sell orders to ingest (Identifier: %s)", len(orders), identifier)
+	upload := lib.MarketUpload{
+		Orders: orders,
+	}
+	sendMsgToPublicUploaders(upload, lib.NatsMarketOrdersIngest, state, identifier.String())
+}
+
+func parseLoadoutOrders(loadoutOrders [][]string, state *albionState) []*lib.MarketOrder {
 	var orders []*lib.MarketOrder
 
 	// For loadouts the MarketOrders are grouped by item.
 	// For example if we have food in our loadout and we want 10 of it, and there are 2 sell orders one with 6 and other with 4,
 	// we will get 2 entries in one of the MarketOrders array entries and the Quantities array will have an entrywith 6 and 4 aswell.
-	for _, groupedOrders := range op.MarketOrders {
-		for _, unparsedOrder := range groupedOrders {
-			// Unmarshal market order data to map
-			var marketOrder map[string]interface{}
-			err2 := json.Unmarshal([]byte(unparsedOrder), &marketOrder)
-			if err2 != nil {
-				log.Fatal(err2)
-			}
-
+	for _, loadoutOrder := range loadoutOrders {
+		for _, unparsedOrder := range loadoutOrder {
 			order := &lib.MarketOrder{}
+			unmarshalOrder(unparsedOrder, order)
 
-			err := json.Unmarshal([]byte(unparsedOrder), order)
-			if err != nil {
-				log.Errorf("Problem converting market order to internal struct: %v", err)
-			}
-
-			// Set the location only if its 0. Smugglers Dens pull locations directly from the market data (above)
-			// while the orignal cities have a null location ID and is pulled from the client state.
+			// Loadout orders are always from the current location.
 			if order.LocationID == 0 {
 				order.LocationID = state.LocationId
 			}
@@ -51,18 +56,12 @@ func (op operationAuctionGetLoadoutOffersResponse) Process(state *albionState) {
 		}
 	}
 
-	if len(orders) < 1 {
-		return
-	}
+	return orders
+}
 
-	// upload := lib.MarketUpload{
-	// 	Orders: orders,
-	// }
-
-	identifier, _ := uuid.NewV4()
-	log.Infof("Sending %d loadout sell orders to ingest (Identifier: %s)", len(orders), identifier)
-	for _, order := range orders {
-		log.Infof("Order: %+v", order)
+func unmarshalOrder(unparsedOrder string, parsedOrder *lib.MarketOrder) {
+	err := json.Unmarshal([]byte(unparsedOrder), parsedOrder)
+	if err != nil {
+		log.Errorf("Problem converting market order to internal struct: %v", err)
 	}
-	//sendMsgToPublicUploaders(upload, lib.NatsMarketOrdersIngest, state, identifier.String())
 }

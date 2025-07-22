@@ -34,6 +34,8 @@ type config struct {
 	Offline                        bool
 	OfflinePath                    string
 	RecordPath                     string
+	Dedup                          bool
+	DedupStats                     bool
 	PrivateIngestBaseUrls          string
 	PublicIngestBaseUrls           string
 	NoCPULimit                     bool
@@ -207,6 +209,20 @@ func (config *config) setupCommonFlags() {
 		"record",
 		"",
 		"Enable recording commands to a file for debugging later.",
+	)
+
+	flag.BoolVar(
+		&config.Dedup,
+		"dedup",
+		true,
+		"Use deduplication on ingest messages to prevent upload of redundant information.",
+	)
+
+	flag.BoolVar(
+		&config.DedupStats,
+		"dedup-stats",
+		false,
+		"Print statistics on message deduplication.",
 	)
 }
 

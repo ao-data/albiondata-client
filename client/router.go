@@ -28,8 +28,9 @@ func newRouter() *Router {
 func (r *Router) run() {
 	var encoder *gob.Encoder
 	var file *os.File
+	var err error
 	if ConfigGlobal.RecordPath != "" {
-		file, err := os.Create(ConfigGlobal.RecordPath)
+		file, err = os.Create(ConfigGlobal.RecordPath)
 		if err != nil {
 			log.Error("Could not open commands output file ", err)
 		} else {

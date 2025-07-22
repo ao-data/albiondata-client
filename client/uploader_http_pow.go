@@ -68,7 +68,7 @@ func (u *httpUploaderPow) getPow(target interface{}) {
 		return
 	}
 
-	json.NewDecoder(resp.Body).Decode(target)
+	err = json.NewDecoder(resp.Body).Decode(target)
 	if err != nil {
 		log.Errorf("Error in parsing Pow Get request: %v", err)
 		return
@@ -128,7 +128,7 @@ func toBinaryBytes(s string) string {
 	for i := 0; i < len(s); i++ {
 		fmt.Fprintf(&buffer, "%08b", s[i])
 	}
-	return fmt.Sprintf("%s", buffer.Bytes())
+	return buffer.String()
 }
 
 // Solves a pow looping through possible solutions

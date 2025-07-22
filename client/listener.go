@@ -152,12 +152,13 @@ func (l *listener) processPacket(packet gopacket.Packet) {
 		return
 	}
 
-	ipv4 := ipLayer.(*layers.IPv4)
-
-	if ipLayer != nil {
-		ipv4, _ = ipLayer.(*layers.IPv4)
-		log.Tracef("Packet came from: %s", ipv4.SrcIP)
+	ipv4, ok := ipLayer.(*layers.IPv4)
+	if !ok {
+		log.Trace("Not an IPv4 packet")
+		return
 	}
+	
+	log.Tracef("Packet came from: %s", ipv4.SrcIP)
 
 	if ipv4.SrcIP == nil {
 		log.Trace("No IPv4 detected")
@@ -165,7 +166,7 @@ func (l *listener) processPacket(packet gopacket.Packet) {
 	}
 	l.router.albionstate.GameServerIP = ipv4.SrcIP.String()
 	l.router.albionstate.AODataServerID, l.router.albionstate.AODataIngestBaseURL = l.router.albionstate.GetServer()
-	log.Tracef("Server ID: %s", l.router.albionstate.AODataServerID)
+	log.Tracef("Server ID: %d", l.router.albionstate.AODataServerID)
 	log.Tracef("Using AODataIngestBaseURL: %s", l.router.albionstate.AODataIngestBaseURL)
 
 	layer := packet.Layer(photon.PhotonLayerType)
@@ -206,7 +207,7 @@ func (l *listener) onReliableCommand(command *photon.PhotonCommand) {
 	msg, err := command.ReliableMessage()
 	if err != nil {
 
-		if fmt.Sprint(err) == "Encryption not supported" && l.router.albionstate.WaitingForMarketData == true {
+		if fmt.Sprint(err) == "Encryption not supported" && l.router.albionstate.WaitingForMarketData {
 			l.router.albionstate.WaitingForMarketData = false
 			log.Info("Market data is encrypted. Please see https://www.albion-online-data.com/client/encryption.html for more information.")
 		}
@@ -230,7 +231,17 @@ func (l *listener) onReliableCommand(command *photon.PhotonCommand) {
 	case photon.OperationRequest:
 		operation, err = decodeRequest(params)
 		if params[253] != nil {
-			number := params[253].(int16)
+			var number int16
+			switch v := params[253].(type) {
+			case int16:
+				number = v
+			case string:
+				log.Debugf("OperationRequest: operation code is string, skipping debug: %v", v)
+				return
+			default:
+				log.Debugf("OperationRequest: operation code is unexpected type %T, skipping debug: %v", v, v)
+				return
+			}
 			shouldDebug, exists := ConfigGlobal.DebugOperations[int(number)]
 			if (exists && shouldDebug) || (!exists && ConfigGlobal.DebugOperationsString == "") {
 				log.Debugf("OperationRequest: [%v]%v - %v", number, OperationType(number), params)
@@ -241,7 +252,17 @@ func (l *listener) onReliableCommand(command *photon.PhotonCommand) {
 	case photon.OperationResponse:
 		operation, err = decodeResponse(params)
 		if params[253] != nil {
-			number := params[253].(int16)
+			var number int16
+			switch v := params[253].(type) {
+			case int16:
+				number = v
+			case string:
+				log.Debugf("OperationResponse: operation code is string, skipping debug: %v", v)
+				return
+			default:
+				log.Debugf("OperationResponse: operation code is unexpected type %T, skipping debug: %v", v, v)
+				return
+			}
 			shouldDebug, exists := ConfigGlobal.DebugOperations[int(number)]
 			if (exists && shouldDebug) || (!exists && ConfigGlobal.DebugOperationsString == "") {
 				log.Debugf("OperationResponse: [%v]%v - %v", number, OperationType(number), params)
@@ -252,7 +273,17 @@ func (l *listener) onReliableCommand(command *photon.PhotonCommand) {
 	case photon.EventDataType:
 		operation, err = decodeEvent(params)
 		if params[252] != nil {
-			number := params[252].(int16)
+			var number int16
+			switch v := params[252].(type) {
+			case int16:
+				number = v
+			case string:
+				log.Debugf("EventDataType: eventType is string, skipping debug: %v", v)
+				return
+			default:
+				log.Debugf("EventDataType: eventType is unexpected type %T, skipping debug: %v", v, v)
+				return
+			}
 			shouldDebug, exists := ConfigGlobal.DebugEvents[int(number)]
 			if (exists && shouldDebug) || (!exists && ConfigGlobal.DebugEventsString == "") {
 				log.Debugf("EventDataType: [%v]%v - %v", number, EventType(number), params)

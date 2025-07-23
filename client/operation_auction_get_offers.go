@@ -80,7 +80,7 @@ func (op operationAuctionGetOffersResponse) Process(state *albionState) {
 
 		// Set the location only if its 0. Smugglers Dens pull locations directly from the market data (above)
 		// while the orignal cities have a null location ID and is pulled from the client state.
-		if order.LocationID == 0 {
+		if order.LocationID == "0" {
 			order.LocationID = state.LocationId
 		}
 

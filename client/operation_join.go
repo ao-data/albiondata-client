@@ -39,6 +39,9 @@ func (op operationJoinResponse) Process(state *albionState) {
 	// Abyssal Depths Patch 2
 	// Antiquarian’s Dens now contain a Marketplace vendor for the corresponding city’s Marketplace
 	if strings.HasSuffix(op.Location, "-HellDen") {
+		// Exception for Caerleon
+		// Stripping to 3003 would be Blackmarket. Therefore we overwrite.
+		if op.Location == "3003-HellDen" {op.Location = "3005"}
 		op.Location = strings.Replace(op.Location, "-HellDen", "", -1)
 	}
 

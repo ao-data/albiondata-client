@@ -36,6 +36,12 @@ func (op operationJoinResponse) Process(state *albionState) {
 		op.Location = strings.Replace(op.Location, "BLACKBANK-", "", -1)
 	}
 
+	// Abyssal Depths Patch 2
+	// Antiquarian’s Dens now contain a Marketplace vendor for the corresponding city’s Marketplace
+	if strings.HasSuffix(op.Location, "-HellDen") {
+		op.Location = strings.Replace(op.Location, "-HellDen", "", -1)
+	}
+
 	loc, err := strconv.Atoi(op.Location)
 	if err != nil {
 		log.Debugf("Unable to convert zoneID to int. Probably an instance.")

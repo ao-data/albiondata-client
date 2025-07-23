@@ -42,6 +42,8 @@ func (op operationJoinResponse) Process(state *albionState) {
 		// Exception for Caerleon
 		// Stripping to 3003 would be Blackmarket. Therefore we overwrite.
 		if op.Location == "3003-HellDen" {op.Location = "3005"}
+
+		// Other cities:
 		op.Location = strings.Replace(op.Location, "-HellDen", "", -1)
 	}
 

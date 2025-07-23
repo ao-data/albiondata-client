@@ -49,7 +49,7 @@ func (state albionState) IsValidLocation() bool {
 
 	case onlydigits.MatchString(state.LocationId):
 		return true
-	case strings.HasSuffix(state.LocationId, "BLACKBANK-"):
+	case strings.HasPrefix(state.LocationId, "BLACKBANK-"):
 		return true
 	case strings.HasSuffix(state.LocationId, "-HellDen"):
 		return true

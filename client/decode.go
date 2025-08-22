@@ -73,6 +73,8 @@ func decodeResponse(params map[uint8]interface{}) (operation operation, err erro
 		operation = &operationRealEstateGetAuctionDataResponse{}
 	case opRealEstateBidOnAuction:
 		operation = &operationRealEstateBidOnAuctionResponse{}
+	case opAuctionGetLoadoutOffers:
+		operation = &operationAuctionGetLoadoutOffersResponse{}
 	default:
 		return nil, nil
 	}

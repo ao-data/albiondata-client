@@ -2,6 +2,19 @@ package lib
 
 import "fmt"
 
+type MarketBuyItemRequest struct {
+	SellOrderID int `json:"SellOrderId"`
+	Amount      int `json:"Amount"`
+	LocationID  int `json:"LocationId"`
+}
+
+type MarketSellItemRequest struct {
+	BuyOrderID int `json:"BuyOrderId"`
+	ItemIndex  int `json:"ItemIndex"`
+	Amount     int `json:"Amount"`
+	LocationID int `json:"LocationId"`
+}
+
 // MarketOrder contains an order (offer or request)
 type MarketOrder struct {
 	ID               int    `json:"Id"`

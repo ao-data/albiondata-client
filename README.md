@@ -63,6 +63,29 @@ Stats for the client releases can be viewed [here](https://tooomm.github.io/gith
 3. The unzipped `albiondata-client` file is a Golang binary file. You'll need to make this file executable so it can be run directly. You can do this from your Terminal with: `chmod +x albiondata-client`
 4. Run the client from your Terminal with `./albiondata-client`
 
+## Running on Ubuntu
+
+Install guide for Ubuntu LTS
+
+### Install app binary
+
+Download latest `update-linux-amd64.gz` version from [the Releases page](https://github.com/ao-data/albiondata-client/releases)
+Unpack it with: `tar -xvf update-linux-amd64.gz`
+Move to .local/bin folder and rename it: `mv ~/Downloads/update-linux-amd64 ~/.local/bin/albiondata-client`
+Give user execution permission: `chmod u+x ~/.local/bin/albiondata-client`
+
+### Install dependency libpcap
+
+```bash
+sudo apt install libpcap-dev
+```
+
+### Give permission for binary to capture data
+
+```bash
+sudo setcap cap_net_raw,cap_net_admin=eip ~/.local/bin/albiondata-client
+```
+
 # Related Projects
 - [albiondata-deduper-dotNet](https://github.com/ao-data/albiondata-deduper-dotNet)
 - [albiondata-sql-dotNet](https://github.com/ao-data/albiondata-sql-dotNet)

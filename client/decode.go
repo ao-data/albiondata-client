@@ -2,6 +2,7 @@ package client
 
 import (
 	"encoding/hex"
+	"fmt"
 	"reflect"
 	"strconv"
 
@@ -15,7 +16,15 @@ func decodeRequest(params map[uint8]interface{}) (operation operation, err error
 		return nil, nil
 	}
 
-	code := params[253].(int16)
+	var code int16
+	switch v := params[253].(type) {
+	case int16:
+		code = v
+	case string:
+		return nil, fmt.Errorf("operation code is string, expected int16: %v", v)
+	default:
+		return nil, fmt.Errorf("operation code is unexpected type %T, expected int16: %v", v, v)
+	}
 
 	switch OperationType(code) {
 	case opGetGameServerByCluster:
@@ -47,7 +56,15 @@ func decodeResponse(params map[uint8]interface{}) (operation operation, err erro
 		return nil, nil
 	}
 
-	code := params[253].(int16)
+	var code int16
+	switch v := params[253].(type) {
+	case int16:
+		code = v
+	case string:
+		return nil, fmt.Errorf("operation code is string, expected int16: %v", v)
+	default:
+		return nil, fmt.Errorf("operation code is unexpected type %T, expected int16: %v", v, v)
+	}
 
 	switch OperationType(code) {
 	case opJoin:
@@ -87,7 +104,15 @@ func decodeEvent(params map[uint8]interface{}) (event operation, err error) {
 		return nil, nil
 	}
 
-	eventType := params[252].(int16)
+	var eventType int16
+	switch v := params[252].(type) {
+	case int16:
+		eventType = v
+	case string:
+		return nil, fmt.Errorf("eventType is string, expected int16: %v", v)
+	default:
+		return nil, fmt.Errorf("eventType is unexpected type %T, expected int16: %v", v, v)
+	}
 
 	switch eventType {
 	// case evRespawn: //TODO: confirm this eventCode (old 77)
@@ -98,9 +123,9 @@ func decodeEvent(params map[uint8]interface{}) (event operation, err error) {
 		return nil, nil
 	}
 
-	err = decodeParams(params, event)
-
-	return event, err
+	// This code is unreachable because all switch cases return
+	// err = decodeParams(params, event)
+	// return event, err
 }
 
 func decodeParams(params map[uint8]interface{}, operation operation) error {

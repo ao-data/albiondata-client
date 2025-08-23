@@ -57,9 +57,7 @@ func (op operationAuctionGetOffersResponse) Process(state *albionState) {
 			location = strings.Split(location, "@")[1]
 
 			// If the location is a smugglers den, remove the BLACKBANK- prefix
-			if strings.Contains(location, "BLACKBANK-") {
-				location = strings.Replace(location, "BLACKBANK-", "", -1)
-			}
+			location = strings.Replace(location, "BLACKBANK-", "", -1)
 
 			// Set the location in the market order
 			marketOrder["LocationId"], _ = strconv.Atoi(location)

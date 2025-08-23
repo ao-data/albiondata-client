@@ -7,7 +7,6 @@ import (
 )
 
 type albionProcessWatcher struct {
-	known     []int
 	devices   []string
 	listeners map[int][]*listener
 	quit      chan bool

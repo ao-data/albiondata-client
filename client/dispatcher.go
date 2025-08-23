@@ -14,12 +14,9 @@ type dispatcher struct{}
 
 var (
 	wsHub *WSHub
-	dis   *dispatcher
 )
 
 func createDispatcher() {
-	dis = &dispatcher{}
-
 	if ConfigGlobal.EnableWebsockets {
 		wsHub = newHub()
 		go wsHub.run()
@@ -137,7 +134,6 @@ func runHTTPServer() {
 func sendMsgToWebSockets(msg []byte, topic string) {
 	// TODO (gradius): send JSON data with topic string
 	// TODO (gradius): this seems super hacky, and I'm sure there's a better way.
-	var result string
-	result = "{\"topic\": \"" + topic + "\", \"data\": " + string(msg) + "}"
+	result := "{\"topic\": \"" + topic + "\", \"data\": " + string(msg) + "}"
 	wsHub.broadcast <- []byte(result)
 }

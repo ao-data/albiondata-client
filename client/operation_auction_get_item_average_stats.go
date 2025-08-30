@@ -2,6 +2,7 @@ package client
 
 import (
 	"sort"
+	"time"
 
 	"github.com/ao-data/albiondata-client/lib"
 	"github.com/ao-data/albiondata-client/log"
@@ -35,6 +36,7 @@ func (op operationAuctionGetItemAverageStats) Process(state *albionState) {
 		timescale: op.Timescale,
 		quality:   op.Quality,
 	}
+
 	state.marketHistoryIDLookup[index] = mhInfo
 	log.Debugf("Market History - Caching %d at %d.", mhInfo.albionId, index)
 }
@@ -48,7 +50,28 @@ type operationAuctionGetItemAverageStatsResponse struct {
 
 func (op operationAuctionGetItemAverageStatsResponse) Process(state *albionState) {
 	var index = op.MessageID % CacheSize
+
+	// Wait for the correlating Request if it has not yet been processed
+	waits := 0
+	for waits < 30 {
+		if state.marketHistoryIDLookup[index].albionId < 1 {
+			time.Sleep(1 * time.Second)
+			waits += 1
+		} else {
+			break
+		}
+	}
+
+	// Still no correlating Request has been processed
+	if state.marketHistoryIDLookup[index].albionId < 1 {
+		log.Warnf("Market History - Market history at index %d is invalid. Has albionId: %s ", index, state.marketHistoryIDLookup[index].albionId)
+		return
+	}
+
 	var mhInfo = state.marketHistoryIDLookup[index]
+
+	// Clear the index in the cache
+	state.marketHistoryIDLookup[index].albionId = 0
 	log.Debugf("Market History - Loaded itemID %d from cache at index %d", mhInfo.albionId, index)
 	log.Debug("Got response to GetItemAverageStats operation for the itemID[", mhInfo.albionId, "] of quality: ", mhInfo.quality, " and on the timescale: ", mhInfo.timescale)
 

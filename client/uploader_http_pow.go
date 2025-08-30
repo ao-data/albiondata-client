@@ -75,7 +75,7 @@ func (u *httpUploaderPow) getPow(target interface{}) {
 	}
 }
 
-// Prooves to the server that a pow was solved by submitting
+// Proves to the server that a pow was solved by submitting
 // the pow's key, the solution and a nats msg as a POST request
 // the topic becomes part of the URL
 func (u *httpUploaderPow) uploadWithPow(pow Pow, solution string, natsmsg []byte, topic string, serverid int, identifier string) {
@@ -95,7 +95,7 @@ func (u *httpUploaderPow) uploadWithPow(pow Pow, solution string, natsmsg []byte
 	resp, err := client.Do(req)
 
 	if err != nil {
-		log.Errorf("Error while prooving pow: %v", err)
+		log.Errorf("Error while proving pow: %v", err)
 		return
 	}
 
@@ -106,7 +106,7 @@ func (u *httpUploaderPow) uploadWithPow(pow Pow, solution string, natsmsg []byte
 		if err != nil {
 			log.Fatal(err)
 		}
-		log.Errorf("HTTP Error while prooving pow. returned: %v (%v)", resp.StatusCode, string(body))
+		log.Errorf("HTTP Error while proving pow. returned: %v (%v)", resp.StatusCode, string(body))
 		return
 	}
 
@@ -114,12 +114,12 @@ func (u *httpUploaderPow) uploadWithPow(pow Pow, solution string, natsmsg []byte
 }
 
 // Generates a random hex string e.g.: faa2743d9181dca5
-func randomHex(n int) (string, error) {
-	bytes := make([]byte, n)
-	if _, err := rand.Read(bytes); err != nil {
-		return "", err
-	}
-	return hex.EncodeToString(bytes), nil
+func randomHex(n int) string {
+    b := make([]byte, n)
+    rand.Read(b)
+    dst := make([]byte, n*2)
+    hex.Encode(dst, b)
+    return string(dst)
 }
 
 // Converts a string to bits e.g.: 0110011...
@@ -135,16 +135,40 @@ func toBinaryBytes(s string) string {
 // until a correct one is found
 // returns the solution
 func solvePow(pow Pow) string {
-	solution := ""
+	wantedLen := len(pow.Wanted)
+	var hexBuf [64]byte
+	var binBuf [512]byte
+
+	prefix := "aod^"
+	sep := "^"
 	for {
-		randhex, _ := randomHex(8)
-		if strings.HasPrefix(toBinaryBytes(fmt.Sprintf("%x", sha256.Sum256([]byte("aod^"+randhex+"^"+pow.Key)))), pow.Wanted) {
-			log.Debugf("SOLVED!")
-			solution = randhex
-			break
+		randhex := randomHex(16)
+		challenge := prefix + randhex + sep + pow.Key
+		hash := sha256.Sum256([]byte(challenge))
+		hex.Encode(hexBuf[:], hash[:])
+
+		idx := 0
+		for i := 0; i < 64; i++ {
+			b := hexBuf[i]
+			for j := 7; j >= 0; j-- {
+				if (b>>j)&1 == 1 {
+					binBuf[idx] = '1'
+				} else {
+					binBuf[idx] = '0'
+				}
+				idx++
+				if idx >= wantedLen {
+					break
+				}
+			}
+			if idx >= wantedLen {
+				break
+			}
+		}
+		if string(binBuf[:wantedLen]) == pow.Wanted {
+			return randhex
 		}
 	}
-	return solution
 }
 
 func (u *httpUploaderPow) sendToIngest(body []byte, topic string, state *albionState, identifier string) {

@@ -49,7 +49,7 @@ func (r *Router) run() {
 			}
 			return
 		case op := <-r.newOperation:
-			go op.Process(r.albionstate)
+			op.Process(r.albionstate)
 		case command := <-r.recordPhotonCommand:
 			if encoder != nil {
 				err := encoder.Encode(command)

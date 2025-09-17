@@ -36,6 +36,7 @@ type config struct {
 	RecordPath                     string
 	PrivateIngestBaseUrls          string
 	PublicIngestBaseUrls           string
+	ParticipateInAODataProject     bool
 	NoCPULimit                     bool
 	PrintVersion                   bool
 }
@@ -161,6 +162,13 @@ func (config *config) setupCommonFlags() {
 	)
 
 	flag.StringVar(
+		&config.PublicIngestBaseUrls,
+		"i",
+		"",
+		"Base URL to send PUBLIC data to, can be 'nats://', 'http://', 'https://' or 'noop' and can have multiple uploaders. Comma separated.",
+	)
+
+	flag.StringVar(
 		&config.ListenDevices,
 		"l",
 		"",
@@ -188,11 +196,11 @@ func (config *config) setupCommonFlags() {
 		"Automatically minimize the window.",
 	)
 
-	flag.StringVar(
-		&config.PublicIngestBaseUrls,
-		"i",
-		"https+pow://albion-online-data.com",
-		"Base URL to send PUBLIC data to, can be 'nats://', 'http://', 'https://' or 'noop' and can have multiple uploaders. Comma separated.",
+	flag.BoolVar(
+		&config.ParticipateInAODataProject,
+		"public-upload",
+		true,
+		"Send your public data to the AO Data Project server so every player can benefit from it.",
 	)
 
 	flag.StringVar(

@@ -39,7 +39,7 @@ jobs:
     - uses: shogo82148/actions-upload-release-asset@v1
       with:
         upload_url: ${{ github.event.release.upload_url }}
-        asset_path: pgk/*.deb
+        asset_path: pkg/*.deb
 
   build-windows:
     name: Build Windows Client

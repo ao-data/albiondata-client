@@ -38,7 +38,7 @@ jobs:
         mkdir -p pkg/deb/usr/bin
         cp albiondata-client pkg/deb/usr/bin
         cd pkg/deb
-        DEBEMAIL="dhjen@outlook.com" dch --create -v 0.1.44 --package albiondata-client --batch "Test build"
+        DEBEMAIL="dhjen@outlook.com" dch --create --newversion 0.1.44 --package albiondata-client "Test build"
         debuild -us -uc
     - uses: actions/upload-artifact@v4
       if: ${{ env.ACT }}

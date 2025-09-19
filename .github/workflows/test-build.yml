@@ -32,26 +32,35 @@ jobs:
     - name: Set up dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y devscripts
+        sudo apt-get install -y devscripts debhelper
 
     - name: Prepare package directory
       run: |
         mkdir -p pkg/deb/usr/bin
         cp albiondata-client pkg/deb/usr/bin
         echo "Source: albiondata-client" > pkg/deb/debian/control
-        echo "Maintainer: Daniel Jensen <dhjen@outlook.com" >> pkg/deb/debian/control
+        echo "Maintainer: Daniel Jensen <dhjen@outlook.com>" >> pkg/deb/debian/control
         echo "Section: utils" >> pkg/deb/debian/control
         echo "Priority: optional" >> pkg/deb/debian/control
-        echo "Version: 0.1.44" >> pkg/deb/debian/control
+        echo "" >> pkg/deb/debian/control
         echo "Package: albiondata-client" >> pkg/deb/debian/control
         echo "Architecture: amd64" >> pkg/deb/debian/control
         echo "Depends: libpcap-dev (>= 1.10.4)" >> pkg/deb/debian/control
-        echo "Description: albiondata-client installation package" >> pkg/deb/debian/control
+        echo "Description: This installs the albiondata-client" >> pkg/deb/debian/control
+        echo " This will install the albiondata-client," >> pkg/deb/debian/control
+        echo " set capture permissions and install dependencies" >> pkg/deb/debian/control
         echo "Homepage: https://www.albion-online-data.com/" >> pkg/deb/debian/control
-        echo "#!/usr/bin/make -f" > pkg/deb/debian/rules
+        cat << 'EOF' > pkg/deb/debian/rules
+        #!/usr/bin/make -f
+
+        %:
+          dh \$@
+        EOF
         echo "%:" >> pkg/deb/debian/rules
         echo "    dh \$@" >> pkg/deb/debian/rules
         chmod +x pkg/deb/debian/rules
+        echo "/usr/bin/albiondata-client usr/bin/" > pkg/deb/debian/albiondata-client.install
+        echo "10" > pkg/deb/debian/compat
 
     - name: Create changelog
       run: |

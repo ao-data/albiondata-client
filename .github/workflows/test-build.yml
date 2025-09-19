@@ -54,14 +54,14 @@ jobs:
         chmod +x pkg/deb/debian/rules
 
     - name: Create changelog
-        run: |
-          cd pkg/deb/debian
-          DEBEMAIL="dhjen@outlook.com" dch --create --newversion 0.1.44 --package albiondata-client "Test build"
+      run: |
+        cd pkg/deb/debian
+        DEBEMAIL="dhjen@outlook.com" dch --create --newversion 0.1.44 --package albiondata-client "Test build"
 
     - name: Build Debian package
-        run: |
-          cd pkg/deb
-          debuild -us -uc
+      run: |
+        cd pkg/deb
+        debuild -us -uc
 
     - uses: actions/upload-artifact@v4
       if: ${{ env.ACT }}

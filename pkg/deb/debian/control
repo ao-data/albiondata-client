@@ -1,9 +1,0 @@
-Package: albiondata-client
-Version: 0.1.44
-Section: utils
-Priority: optional
-Architecture: amd64
-Maintainer: Daniel Jensen <dhjen@outlook.com>
-Description: albiondata-client installation package
-Depends: libpcap-dev (>= 1.10.4)
-Homepage: https://www.albion-online-data.com/

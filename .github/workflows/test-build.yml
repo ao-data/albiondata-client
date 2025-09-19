@@ -33,13 +33,36 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install -y devscripts
-    - name: Build Debian package
+
+    - name: Prepare package directory
       run: |
         mkdir -p pkg/deb/usr/bin
         cp albiondata-client pkg/deb/usr/bin
-        cd pkg/deb
-        DEBEMAIL="dhjen@outlook.com" dch --create --newversion 0.1.44 --package albiondata-client "Test build"
-        debuild -us -uc
+        echo "Source: albiondata-client" > pkg/deb/debian/control
+        echo "Maintainer: Daniel Jensen <dhjen@outlook.com" >> pkg/deb/debian/control
+        echo "Section: utils" >> pkg/deb/debian/control
+        echo "Priority: optional" >> pkg/deb/debian/control
+        echo "Version: 0.1.44" >> pkg/deb/debian/control
+        echo "Package: albiondata-client" >> pkg/deb/debian/control
+        echo "Architecture: amd64" >> pkg/deb/debian/control
+        echo "Depends: libpcap-dev (>= 1.10.4)" >> pkg/deb/debian/control
+        echo "Description: albiondata-client installation package" >> pkg/deb/debian/control
+        echo "Homepage: https://www.albion-online-data.com/" >> pkg/deb/debian/control
+        echo "#!/usr/bin/make -f" > pkg/deb/debian/rules
+        echo "%:" >> pkg/deb/debian/rules
+        echo "    dh \$@" >> pkg/deb/debian/rules
+        chmod +x pkg/deb/debian/rules
+
+    - name: Create changelog
+        run: |
+          cd pkg/deb/debian
+          DEBEMAIL="dhjen@outlook.com" dch --create --newversion 0.1.44 --package albiondata-client "Test build"
+
+    - name: Build Debian package
+        run: |
+          cd pkg/deb
+          debuild -us -uc
+
     - uses: actions/upload-artifact@v4
       if: ${{ env.ACT }}
       with:

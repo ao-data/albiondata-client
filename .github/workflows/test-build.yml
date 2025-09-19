@@ -29,6 +29,22 @@ jobs:
         name: files
         path: update-linux-amd64.gz
 
+    - name: Set up dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y devscripts
+    - name: Build Debian package
+      run: |
+        mkdir -p pkg/deb/usr/bin
+        cp albiondata-client pkg/deb/usr/bin
+        cd pkg/deb
+        debuild -us -uc
+    - uses: actions/upload-artifact@v4
+      if: ${{ env.ACT }}
+      with:
+        name: files
+        path: pgk/deb/*.deb
+
   build-windows:
     name: Build Windows Client
     runs-on: ubuntu-latest

@@ -1,0 +1,12 @@
+Source: albiondata-client
+Maintainer: Daniel Jensen <dhjen@outlook.com>
+Section: utils
+Priority: optional
+
+Package: albiondata-client
+Architecture: amd64
+Depends: libpcap-dev (>= 1.10.4)
+Description: This installs the albiondata-client
+ This will install the albiondata-client,
+ set capture permissions and install dependencies
+Homepage: https://www.albion-online-data.com/

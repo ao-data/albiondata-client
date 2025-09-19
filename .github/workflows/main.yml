@@ -22,19 +22,24 @@ jobs:
         asset_path: update-linux-amd64.gz
     - name: Set up dependencies
       run: |
-          sudo apt-get update
-          sudo apt-get install -y devscripts
-    - name: Build Debian package
+        sudo apt-get update
+        sudo apt-get install -y devscripts debhelper build-essential
+    - name: Prepare package directory
       run: |
         mkdir -p pkg/deb/usr/bin
         cp albiondata-client pkg/deb/usr/bin
+    - name: Create changelog
+      run: |
+        cd pkg/deb/
+        DEBEMAIL="dhjen@outlook.com" dch --create --newversion $GITHUB_REF_NAME --package albiondata-client "$GITHUB_REF_NAME build"
+    - name: Build Debian package
+      run: |
         cd pkg/deb
-        dch --create -v 0.1.44 --package albiondata-client
-        debuild -us -uc
+        debuild -b -us -uc
     - uses: shogo82148/actions-upload-release-asset@v1
       with:
         upload_url: ${{ github.event.release.upload_url }}
-        asset_path: pgk/deb/*.deb
+        asset_path: pgk/*.deb
 
   build-windows:
     name: Build Windows Client

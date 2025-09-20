@@ -42,7 +42,8 @@ jobs:
     - name: Create changelog
       run: |
         cd pkg/deb/
-        DEBEMAIL="dhjen@outlook.com" dch --create --newversion 0.$GITHUB_REF_NAME --package albiondata-client "Test build"
+        VERSION=$(echo "$GITHUB_REF_NAME" | sed 's/[^0-9.]*//g')  # Keep only digits and dots
+        DEBEMAIL="dhjen@outlook.com" dch --create --newversion "$VERSION" --package albiondata-client "$GITHUB_REF_NAME test build"
 
     - name: Build Debian package
       run: |

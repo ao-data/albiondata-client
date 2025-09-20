@@ -28,6 +28,11 @@ jobs:
       run: |
         mkdir -p pkg/deb/usr/bin
         cp albiondata-client pkg/deb/usr/bin
+    - name: Download changelog artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: changelog
+          path: pkg/deb/debian
     - name: Create changelog
       run: |
         cd pkg/deb/
@@ -36,6 +41,11 @@ jobs:
       run: |
         cd pkg/deb
         debuild -b -us -uc
+    - name: Upload changelog as artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: changelog
+          path: pkg/deb/debian/changelog
     - uses: shogo82148/actions-upload-release-asset@v1
       with:
         upload_url: ${{ github.event.release.upload_url }}

@@ -29,7 +29,7 @@ jobs:
         mkdir -p pkg/deb/usr/bin
         cp albiondata-client pkg/deb/usr/bin
     - name: Download changelog artifact
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4
         with:
           name: changelog
           path: pkg/deb/debian
@@ -42,7 +42,7 @@ jobs:
         cd pkg/deb
         debuild -b -us -uc
     - name: Upload changelog as artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: changelog
           path: pkg/deb/debian/changelog

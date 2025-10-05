@@ -2,6 +2,7 @@ package client
 
 import (
 	"strings"
+	"regexp"
 
 	"github.com/ao-data/albiondata-client/lib"
 	"github.com/ao-data/albiondata-client/log"
@@ -18,7 +19,7 @@ type marketHistoryInfo struct {
 }
 
 type albionState struct {
-	LocationId           int
+	LocationId           string
 	LocationString       string
 	CharacterId          lib.CharacterID
 	CharacterName        string
@@ -36,21 +37,31 @@ type albionState struct {
 }
 
 func (state albionState) IsValidLocation() bool {
-	if state.LocationId < 0 {
-		if state.LocationId == -1 {
-			log.Error("The players location has not yet been set. Please transition zones so the location can be identified.")
-			if !ConfigGlobal.Debug {
-				notification.Push("The players location has not yet been set. Please transition zones so the location can be identified.")
-			}
-		} else {
-			log.Error("The players location is not valid. Please transition zones so the location can be fixed.")
-			if !ConfigGlobal.Debug {
-				notification.Push("The players location is not valid. Please transition zones so the location can be fixed.")
-			}
+	var onlydigits = regexp.MustCompile(`^[0-9]+$`)
+
+	switch {
+	case state.LocationId == "":
+		log.Error("The players location has not yet been set. Please transition zones so the location can be identified.")
+		if !ConfigGlobal.Debug {
+			notification.Push("The players location has not yet been set. Please transition zones so the location can be identified.")
+		}
+		return false
+
+	case onlydigits.MatchString(state.LocationId):
+		return true
+	case strings.HasPrefix(state.LocationId, "BLACKBANK-"):
+		return true
+	case strings.HasSuffix(state.LocationId, "-HellDen"):
+		return true
+	case strings.HasSuffix(state.LocationId, "-Auction2"):
+		return true
+	default:
+		log.Error("The players location is not valid. Please transition zones so the location can be fixed.")
+		if !ConfigGlobal.Debug {
+			notification.Push("The players location is not valid. Please transition zones so the location can be fixed.")
 		}
 		return false
 	}
-	return true
 }
 
 func (state albionState) GetServer() (int, string) {

@@ -2,7 +2,6 @@ package client
 
 import (
 	"encoding/json"
-	"strconv"
 	"strings"
 
 	"github.com/ao-data/albiondata-client/lib"
@@ -53,16 +52,9 @@ func (op operationAuctionGetOffersResponse) Process(state *albionState) {
 
 		// if the location has @, it is either a rest or smugglers den
 		if strings.Contains(location, "@") {
-			// Remove the @ and everything before it
-			location = strings.Split(location, "@")[1]
-
-			// If the location is a smugglers den, remove the BLACKBANK- prefix
-			if strings.Contains(location, "BLACKBANK-") {
-				location = strings.Replace(location, "BLACKBANK-", "", -1)
-			}
 
 			// Set the location in the market order
-			marketOrder["LocationId"], _ = strconv.Atoi(location)
+			marketOrder["LocationId"] = location
 
 			// Marshal the map back to json
 			newJson, _ := json.Marshal(marketOrder)
@@ -78,9 +70,9 @@ func (op operationAuctionGetOffersResponse) Process(state *albionState) {
 			log.Errorf("Problem converting market order to internal struct: %v", err)
 		}
 
-		// Set the location only if its 0. Smugglers Dens pull locations directly from the market data (above)
+		// Set the location only if its string(nil). Smugglers Dens pull locations directly from the market data (above)
 		// while the orignal cities have a null location ID and is pulled from the client state.
-		if order.LocationID == 0 {
+		if order.LocationID == "" {
 			order.LocationID = state.LocationId
 		}
 

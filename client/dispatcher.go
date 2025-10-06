@@ -38,7 +38,7 @@ func createUploaders(targets []string) []uploader {
 			continue
 		}
 
-		if target[0:8] == "http+pow" ||  target[0:9] == "https+pow" {
+		if target[0:8] == "http+pow" || target[0:9] == "https+pow" {
 			uploaders = append(uploaders, newHTTPUploaderPow(target))
 		} else if target[0:4] == "http" || target[0:5] == "https" {
 			uploaders = append(uploaders, newHTTPUploader(target))
@@ -59,23 +59,34 @@ func sendMsgToPublicUploaders(upload interface{}, topic string, state *albionSta
 		return
 	}
 
-	var PublicIngestBaseUrls = ConfigGlobal.PublicIngestBaseUrls
-	// http+pow://albion-online-data.com is used as a magic placeholder for every realm there is
-	if strings.Contains(ConfigGlobal.PublicIngestBaseUrls, "https+pow://albion-online-data.com") {
-		// we replace the placeholder with the correct one based on the serverID from albionState
-		PublicIngestBaseUrls = strings.Replace(PublicIngestBaseUrls, "https+pow://albion-online-data.com", state.AODataIngestBaseURL, -1)
-	}
+	var publicDataUploaders = getPublicDataUploaders(state)
+	var privateDataUploaders = getPrivateDataUploaders()
 
-	var publicUploaders = createUploaders(strings.Split(PublicIngestBaseUrls, ","))
-	var privateUploaders = createUploaders(strings.Split(ConfigGlobal.PrivateIngestBaseUrls, ","))
-
-	sendMsgToUploaders(data, topic, publicUploaders, state, identifier)
-	sendMsgToUploaders(data, topic, privateUploaders, state, identifier)
+	sendMsgToUploaders(data, topic, publicDataUploaders, state, identifier)
+	sendMsgToUploaders(data, topic, privateDataUploaders, state, identifier)
 
 	// If websockets are enabled, send the data there too
 	if ConfigGlobal.EnableWebsockets {
 		sendMsgToWebSockets(data, topic)
 	}
+}
+
+func getPublicDataUploaders(state *albionState) []uploader {
+	var uploaders = createUploaders(strings.Split(ConfigGlobal.PublicIngestBaseUrls, ","))
+
+	if ConfigGlobal.ParticipateInAODataProject {
+		uploaders = append(uploaders, getAODataProjectUploaders(state)...)
+	}
+
+	return uploaders
+}
+
+func getAODataProjectUploaders(state *albionState) []uploader {
+	return createUploaders([]string{state.AODataIngestBaseURL})
+}
+
+func getPrivateDataUploaders() []uploader {
+	return createUploaders(strings.Split(ConfigGlobal.PrivateIngestBaseUrls, ","))
 }
 
 func sendMsgToPrivateUploaders(upload lib.PersonalizedUpload, topic string, state *albionState, identifier string) {

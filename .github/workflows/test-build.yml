@@ -13,7 +13,7 @@ jobs:
     - name: Set up Go
       uses: actions/setup-go@v3
       with:
-        go-version: 1.16
+        go-version: stable
     - name: Build
       run: make build-linux
 
@@ -37,7 +37,7 @@ jobs:
     - name: Set up Go
       uses: actions/setup-go@v3
       with:
-        go-version: 1.16
+        go-version: stable
 
     - name: install nsis
       run: sudo apt-get update; sudo apt-get -y install nsis
@@ -72,7 +72,7 @@ jobs:
     - name: Set up Go
       uses: actions/setup-go@v3
       with:
-        go-version: 1.19
+        go-version: stable
 
     - name: Build
       run: go build -ldflags "-s -w -X main.version=$GITHUB_REF_NAME" albiondata-client.go

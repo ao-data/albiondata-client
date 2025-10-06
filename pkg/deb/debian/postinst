@@ -1,0 +1,7 @@
+#!/bin/sh
+
+set -e
+
+setcap cap_net_raw,cap_net_admin=eip /usr/bin/albiondata-client
+
+exit 0

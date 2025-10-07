@@ -9,5 +9,4 @@ _vendor-[0-9]*
 *.gob
 scripts/albiondata-client
 albiondata-client-output.txt
-albiondata-client
 config.yaml

@@ -1,7 +1,6 @@
 package client
 
 import (
-	"bytes"
 	"crypto/rand"
 	"crypto/sha256"
 	"encoding/hex"
@@ -125,9 +124,7 @@ func randomHex(n int) string {
 // returns the solution
 func solvePow(pow Pow) string {
 	wantedLen := len(pow.Wanted)
-	wantedBytes := []byte(pow.Wanted)
 	var hexBuf [64]byte
-	var binBuf [512]byte
 
 	for {
 		randhex := randomHex(16)
@@ -135,23 +132,21 @@ func solvePow(pow Pow) string {
 		hex.Encode(hexBuf[:], hash[:])
 
 		idx := 0
-		for i := 0; i < 64; i++ {
-			for j := 7; j >= 0; j-- {
-				if (hexBuf[i]>>j)&1 == 1 {
-					binBuf[idx] = '1'
-				} else {
-					binBuf[idx] = '0'
-				}
-				idx++
-				if idx >= wantedLen {
+		mismatch := false
+		for i := 0; i < 64 && idx < wantedLen; i++ {
+			for j := 7; j >= 0 && idx < wantedLen; j-- {
+				if (hexBuf[i]>>j)&1 != pow.Wanted[idx] - '0' {
+					mismatch = true
 					break
 				}
+				idx++
 			}
-			if idx >= wantedLen {
+			if mismatch {
 				break
 			}
 		}
-		if bytes.Equal(binBuf[:wantedLen], wantedBytes) {
+
+		if !mismatch {
 			return randhex
 		}
 	}

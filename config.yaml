@@ -1,0 +1,12 @@
+store:
+  driver: ""          # will be "sqlite3" later
+  dsn: ""             # will be "./data/albion.db" later
+  auto_migrate: true
+
+sheets:
+  enabled: false
+  credentials_file: ./secrets/google_oauth.json
+  spreadsheet_id: ""
+  tabs:
+    ore_prices: "Ore!A1:Z999"
+    city_spreads: "Spreads!A1:Z999"

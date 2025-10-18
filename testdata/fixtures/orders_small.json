@@ -1,0 +1,4 @@
+[
+  {"ts_utc":"2025-07-01T12:00:00Z","item_id":"T4_ORE","enchant":0,"quality":1,"city":"Martlock","price":120,"quantity":100,"op_uuid":"u1","location_id":"MARTLOCK"},
+  {"ts_utc":"2025-07-01T12:05:00Z","item_id":"T4_ORE","enchant":0,"quality":1,"city":"Lymhurst","price":135,"quantity":100,"op_uuid":"u2","location_id":"LYMHURST"}
+]

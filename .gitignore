@@ -1,12 +1,4 @@
-.idea/
-vendor/
-_vendor-[0-9]*
-.vscode/
-*.exe
-*.gz
-*.zip
-*.pcap
-*.gob
-scripts/albiondata-client
-albiondata-client-output.txt
-config.yaml
+/data/*.db
+/captures/**
+/secrets/**
+.env

@@ -1,17 +1,9 @@
-run:
-	scripts/run.sh
+.PHONY: migrate import-fixtures dev
+migrate:
+	@mkdir -p data
+	@echo "Apply schema.sql (stub) — real migrations will be wired in Plan 1"
 
-fmt:
-	scripts/fmt.sh
+import-fixtures:
+	@echo "Importer stub — will load fixtures after we add cmd/import"
 
-validate-fmt:
-	scripts/validate-fmt.sh
-
-build-windows:
-	scripts/build-windows.sh
-
-build-linux:
-	scripts/build-linux.sh
-
-build-darwin:
-	scripts/build-darwin.sh
+dev: migrate import-fixtures

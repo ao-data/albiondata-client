@@ -1,3 +1,6 @@
 EnableWebsockets: False
 AllowedWebsocketHosts:
   - www.example.com
+
+# Enable desktop notifications for bandit/world events
+# NotifyBanditEvents: False

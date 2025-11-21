@@ -38,6 +38,7 @@ type config struct {
 	PublicIngestBaseUrls           string
 	NoCPULimit                     bool
 	PrintVersion                   bool
+	NotifyBanditEvents             bool
 }
 
 // config global config data
@@ -207,6 +208,13 @@ func (config *config) setupCommonFlags() {
 		"record",
 		"",
 		"Enable recording commands to a file for debugging later.",
+	)
+
+	flag.BoolVar(
+		&config.NotifyBanditEvents,
+		"notify-bandit",
+		false,
+		"Enable desktop notifications for bandit events.",
 	)
 }
 

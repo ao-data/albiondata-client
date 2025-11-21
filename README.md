@@ -87,6 +87,24 @@ To allow binary to capture data without using sudo
 sudo setcap cap_net_raw,cap_net_admin=eip ~/.local/bin/albiondata-client
 ```
 
+# Features
+
+## Desktop Notifications for Bandit Events
+
+The client can send desktop notifications when bandit events (world events) are detected in the game. This helps you stay informed about important events without constantly watching the game client.
+
+### Enable Bandit Notifications
+
+To enable desktop notifications for bandit events, use the `--notify-bandit` flag:
+
+```bash
+./albiondata-client --notify-bandit
+```
+
+When enabled, you will receive desktop notifications whenever a bandit event is detected, showing the event location and ID.
+
+**Note**: Desktop notifications are supported on Windows, Linux, and macOS.
+
 # Related Projects
 - [albiondata-deduper-dotNet](https://github.com/ao-data/albiondata-deduper-dotNet)
 - [albiondata-sql-dotNet](https://github.com/ao-data/albiondata-sql-dotNet)

@@ -23,10 +23,11 @@ func (event eventRedZoneWorldEvent) Process(state *albionState) {
 	// Event types:
 	// Bandit events typically have specific event type identifiers
 	// We'll notify on all world events for now, but can be filtered if needed
-	message := fmt.Sprintf("World Event Detected: %s", event.Location)
-	
+	var message string
 	if event.EventID != "" {
 		message = fmt.Sprintf("World Event [%s] at: %s", event.EventID, event.Location)
+	} else {
+		message = fmt.Sprintf("World Event Detected: %s", event.Location)
 	}
 
 	log.Infof("Bandit/World Event detected: %v at %v", event.EventID, event.Location)

@@ -94,8 +94,8 @@ func decodeEvent(params map[uint8]interface{}) (event operation, err error) {
 	// 	event = &eventPlayerOnlineStatus{}
 	// case evCharacterStats: //TODO: confirm this eventCode (old 114)
 	// 	event = &eventSkillData{}
-	case evRedZoneWorldEvent:
-		event = &eventRedZoneWorldEvent{}
+	case evRedZonePlayerNotification:
+		event = &eventRedZonePlayerNotification{}
 	default:
 		return nil, nil
 	}

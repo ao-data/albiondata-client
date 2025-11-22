@@ -214,7 +214,7 @@ func (config *config) setupCommonFlags() {
 		&config.NotifyBanditEvents,
 		"notify-bandit",
 		false,
-		"Enable desktop notifications for bandit events.",
+		"Enable notifications for bandit events.",
 	)
 }
 

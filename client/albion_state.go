@@ -34,6 +34,9 @@ type albionState struct {
 	// The index is the message number (param255) % CacheSize
 	marketHistoryIDLookup [CacheSize]marketHistoryInfo
 	// TODO could this be improved?!
+
+	// Bandits start time
+	BanditEventStartTime int64
 }
 
 func (state albionState) IsValidLocation() bool {

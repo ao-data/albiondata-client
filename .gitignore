@@ -8,6 +8,5 @@ _vendor-[0-9]*
 *.pcap
 *.gob
 scripts/albiondata-client
-albiondata-client
 albiondata-client-output.txt
 config.yaml

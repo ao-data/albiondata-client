@@ -13,12 +13,16 @@ import (
 type dispatcher struct{}
 
 var (
-	wsHub *WSHub
-	dis   *dispatcher
+	wsHub          *WSHub
+	dis            *dispatcher
+	ingestMsgCache *IngestMsgCache
 )
 
 func createDispatcher() {
 	dis = &dispatcher{}
+	ingestMsgCache = &IngestMsgCache{}
+
+	go ingestMsgCache.StatsReporter()
 
 	if ConfigGlobal.EnableWebsockets {
 		wsHub = newHub()
@@ -69,8 +73,13 @@ func sendMsgToPublicUploaders(upload interface{}, topic string, state *albionSta
 	var publicUploaders = createUploaders(strings.Split(PublicIngestBaseUrls, ","))
 	var privateUploaders = createUploaders(strings.Split(ConfigGlobal.PrivateIngestBaseUrls, ","))
 
-	sendMsgToUploaders(data, topic, publicUploaders, state, identifier)
-	sendMsgToUploaders(data, topic, privateUploaders, state, identifier)
+	duplicate := ingestMsgCache.isDuplicate(data)
+	if !duplicate {
+		sendMsgToUploaders(data, topic, publicUploaders, state, identifier)
+		sendMsgToUploaders(data, topic, privateUploaders, state, identifier)
+	} else {
+		log.Infof("CacheLookup: Message of %s was uploaded before. No need to upload again.", identifier)
+	}	
 
 	// If websockets are enabled, send the data there too
 	if ConfigGlobal.EnableWebsockets {

@@ -53,6 +53,6 @@ func (op operationGetClusterMapInfoResponse) Process(state *albionState) {
 	}
 
 	identifier, _ := uuid.NewV4()
-	log.Info("Sending map data to ingest (Identifier: %s)", identifier)
+	log.Infof("Sending map data to ingest (Identifier: %s)", identifier)
 	sendMsgToPublicUploaders(upload, lib.NatsMapDataIngest, state, identifier.String())
 }

@@ -17,5 +17,5 @@ func (event eventRedZonePlayerNotification) Process(state *albionState) {
 
 	identifier, _ := uuid.NewV4()
 	upload := lib.BanditsEventNotification{}
-	sendMsgToPrivateUploaders(&upload, "bandits_event_notification", state, identifier.String())
+	sendMsgToPrivateUploaders(&upload, "bandits_event_update", state, identifier.String())
 }

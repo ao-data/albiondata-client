@@ -11,6 +11,7 @@ const (
 	NatsValidMarketOrders      = "validmarketorders"
 	NatsMapDataIngest          = "mapdata.ingest"
 	NatsMapDataDeduped         = "mapdata.deduped"
+	NatsBanditEvent            = "banditevent.ingest"
 
 	// Private Topics
 	NatsSkillData           = "skills"

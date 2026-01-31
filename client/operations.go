@@ -108,6 +108,7 @@ const (
 	opAuctionGetMyOpenAuctions
 	opAuctionGetItemAverageStats
 	opAuctionGetItemAverageValue
+	opAuctionGetLowestOfferPrices
 	opContainerOpen
 	opContainerClose
 	opContainerManageSubContainer
@@ -245,6 +246,7 @@ const (
 	opPartyChangeLootSetting
 	opPartyMarkObject
 	opPartySetRole
+	opPartyChangeFactionWarfareRequestReinforcementsSetting
 	opSetGuildCodex
 	opExitEnterStart
 	opExitEnterCancel
@@ -349,13 +351,14 @@ const (
 	opUpdateGuildAccessTag
 	opSteamStartMicrotransaction
 	opSteamFinishMicrotransaction
+	opRequestXboxPurchaseIntent
+	opCloseXboxPurchaseIntent
 	opSteamIdHasActiveAccount
 	opCheckEmailAccountState
 	opLinkAccountToSteamId
 	opEpicIdHasActiveAccount
 	opLinkAccountToEpicId
 	opXboxIdHasActiveAccount
-	opLinkAccountToXboxToken
 	opInAppConfirmPaymentGooglePlay
 	opInAppConfirmPaymentAppleAppStore
 	opInAppPurchaseRequest
@@ -470,6 +473,8 @@ const (
 	opAuctionBuyLoadoutOffer
 	opAccountDeletionRequest
 	opAccountReactivationRequest
+	opCreateModeratorNotesForAccount
+	opGetModeratorNotesForAccount
 	opGetModerationEscalationDefiniton
 	opEventBasedPopupAddSeen
 	opGetItemKillHistory
@@ -541,4 +546,8 @@ const (
 	opHellDungeonUseStaticEntrance
 	opTravelIslandShowroom
 	opGetXuids
+	opXboxServiceTicket
+	opEvaluatePlatformPerks
+	opLinkAccountToXbox
+	opTravelFactionWarfarePortal
 )

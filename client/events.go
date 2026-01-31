@@ -251,6 +251,7 @@ const (
 	evPartySetRoleFlag
 	evPartyInviteOrJoinPlayerEquipmentInfo
 	evPartyReadyCheckUpdate
+	evPartyFactionWarfareReinforcementSettingChangedPlayer
 	evSpellCooldownUpdate
 	evNewHellgateExitPortal
 	evNewExpeditionExit
@@ -305,6 +306,7 @@ const (
 	evFriendUpdated
 	evPartyLootItems
 	evPartyLootItemsRemoved
+	evPartyLootItemTypesRemoved
 	evReputationUpdate
 	evDefenseUnitAttackBegin
 	evDefenseUnitAttackEnd
@@ -643,4 +645,27 @@ const (
 	evNewHellDungeonRoomShrineObject
 	evHellDungeonRoomShrineStateUpdate
 	evSimpleBehaviourBuildingStateUpdate
+	evSetTimeScaling
+	evStopTimeScaling
+	evKeyValidation
+	evPlayerJoinMapMarkerTimerStates
+	evNewMapMarkerTimer
+	evRemoveMapMarkerTimer
+	evNewFactionFortressObject
+	evFactionFortressAnnouncePlayerEjection
+	evRewardFactionWarfareSupply
+	evFactionCaptureAreaProgressUpdate
+	evFactionFortressClaimed
+	evFactionFortressWeaponCachesSpawned
+	evFactionFortressWeaponCacheClaimed
+	evFactionFortressFightStateUpdate
+	evFactionFortressCutoffFightStateUpdate
+	evFactionFortressFightEnded
+	evNewFactionWarfarePortal
+	evFactionPortalTargetUpdate
+	evFactionFortressFightStartedInRemoteClusterEvent
+	evFactionFortressFightFinishedInRemoteClusterEvent
+	evFactionDuchySupplyWarDefensiveVictoryEvent
+	evFactionDuchyReconnectedFromCutoffEvent
+	evFactionFortressCutoffFightCancelledByClusterOwnerChangeEvent
 )

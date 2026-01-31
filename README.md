@@ -63,17 +63,15 @@ Stats for the client releases can be viewed [here](https://tooomm.github.io/gith
 3. The unzipped `albiondata-client` file is a Golang binary file. You'll need to make this file executable so it can be run directly. You can do this from your Terminal with: `chmod +x albiondata-client`
 4. Run the client from your Terminal with `./albiondata-client`
 
-## Running on Ubuntu
-
-Install guide for Ubuntu LTS
+## Running on Debian or Debian based distros
 
 ### Install app binary
+<sup>`~/.local/bin` requires systemd. If you don't roll with systemd use something else. </sup>
 
-1. Download latest `update-linux-amd64.gz` version from [the Releases page](https://github.com/ao-data/albiondata-client/releases) Example: `curl -L https://github.com/ao-data/albiondata-client/releases/download/0.1.44/update-linux-amd64.gz -o ~/Downloads/update-linux-amd64.gz`
-2. Unpack it with: `gzip -d ~/Downloads/update-linux-amd64.gz`
-3. Make ~/.local/bin folder: `mkdir -p ~/.local/bin`
-4. Move to .local/bin folder and rename it: `mv ~/Downloads/update-linux-amd64 ~/.local/bin/albiondata-client`
-5. Give user execution permission: `chmod u+x ~/.local/bin/albiondata-client`
+1. Create ~/.local/bin folder: `mkdir -p ~/.local/bin`
+2. Download latest `update-linux-amd64.gz` version from [the Releases page](https://github.com/ao-data/albiondata-client/releases)  
+`curl -L https://github.com/ao-data/albiondata-client/releases/latest/download/update-linux-amd64.gz -o - | gzip -d > ~/.local/bin/albiondata-client`
+3. Give user execution permission: `chmod u+x ~/.local/bin/albiondata-client`
 
 ### Install dependency libpcap
 
@@ -81,7 +79,7 @@ Install guide for Ubuntu LTS
 sudo apt install libpcap-dev
 ```
 
-### Give permission for binary to capture data
+### Give binary permission to capture network traffic
 
 To allow binary to capture data without using sudo
 

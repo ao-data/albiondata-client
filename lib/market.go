@@ -7,7 +7,7 @@ type MarketOrder struct {
 	ID               int    `json:"Id"`
 	ItemID           string `json:"ItemTypeId"`
 	GroupTypeId      string `json:"ItemGroupTypeId"`
-	LocationID       int    `json:"LocationId"`
+	LocationID       string `json:"LocationId"`
 	QualityLevel     int    `json:"QualityLevel"`
 	EnchantmentLevel int    `json:"EnchantmentLevel"`
 	Price            int    `json:"UnitPriceSilver"`

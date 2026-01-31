@@ -69,8 +69,8 @@ func sendMsgToPublicUploaders(upload interface{}, topic string, state *albionSta
 	var publicUploaders = createUploaders(strings.Split(PublicIngestBaseUrls, ","))
 	var privateUploaders = createUploaders(strings.Split(ConfigGlobal.PrivateIngestBaseUrls, ","))
 
-	go sendMsgToUploaders(data, topic, publicUploaders, state, identifier)
-	go sendMsgToUploaders(data, topic, privateUploaders, state, identifier)
+	sendMsgToUploaders(data, topic, publicUploaders, state, identifier)
+	sendMsgToUploaders(data, topic, privateUploaders, state, identifier)
 
 	// If websockets are enabled, send the data there too
 	if ConfigGlobal.EnableWebsockets {
@@ -102,7 +102,7 @@ func sendMsgToPrivateUploaders(upload lib.PersonalizedUpload, topic string, stat
 
 	var privateUploaders = createUploaders(strings.Split(ConfigGlobal.PrivateIngestBaseUrls, ","))
 	if len(privateUploaders) > 0 {
-		go sendMsgToUploaders(data, topic, privateUploaders, state, identifier)
+		sendMsgToUploaders(data, topic, privateUploaders, state, identifier)
 	}
 
 	// If websockets are enabled, send the data there too

@@ -1,12 +1,15 @@
-# github.com/ao-data/go-githubupdate v0.0.0-20230216133638-c4accecc2f64
-## explicit; go 1.16
+# aead.dev/minisign v0.3.0
+## explicit; go 1.21
+aead.dev/minisign
+# github.com/ao-data/go-githubupdate v0.0.0-20260201170319-c56c2e714903
+## explicit; go 1.22
 github.com/ao-data/go-githubupdate/updater
 # github.com/ao-data/photon-spectator v0.0.0-20260131231036-42f34c5bea4d
 ## explicit; go 1.24.0
 github.com/ao-data/photon-spectator
-# github.com/blang/semver v3.5.1+incompatible
-## explicit
-github.com/blang/semver
+# github.com/blang/semver/v4 v4.0.0
+## explicit; go 1.14
+github.com/blang/semver/v4
 # github.com/cespare/xxhash/v2 v2.3.0
 ## explicit; go 1.11
 github.com/cespare/xxhash/v2
@@ -57,9 +60,9 @@ github.com/go-viper/mapstructure/v2/internal/errors
 # github.com/gonutz/w32 v1.0.0
 ## explicit
 github.com/gonutz/w32
-# github.com/google/go-github v17.0.0+incompatible
-## explicit
-github.com/google/go-github/github
+# github.com/google/go-github/v68 v68.0.0
+## explicit; go 1.21
+github.com/google/go-github/v68/github
 # github.com/google/go-querystring v1.2.0
 ## explicit; go 1.13
 github.com/google/go-querystring/query
@@ -76,18 +79,17 @@ github.com/gorilla/websocket
 github.com/hashicorp/golang-lru/v2
 github.com/hashicorp/golang-lru/v2/internal
 github.com/hashicorp/golang-lru/v2/simplelru
-# github.com/kardianos/osext v0.0.0-20190222173326-2bc1f35cddc0
-## explicit
-github.com/kardianos/osext
-# github.com/kr/binarydist v0.1.0
-## explicit
-github.com/kr/binarydist
 # github.com/mattn/go-colorable v0.1.14
 ## explicit; go 1.18
 github.com/mattn/go-colorable
 # github.com/mattn/go-isatty v0.0.20
 ## explicit; go 1.15
 github.com/mattn/go-isatty
+# github.com/minio/selfupdate v0.6.0
+## explicit; go 1.14
+github.com/minio/selfupdate
+github.com/minio/selfupdate/internal/binarydist
+github.com/minio/selfupdate/internal/osext
 # github.com/mitchellh/mapstructure v1.5.0
 ## explicit; go 1.14
 github.com/mitchellh/mapstructure
@@ -198,7 +200,9 @@ golang.org/x/crypto/internal/alias
 golang.org/x/crypto/internal/poly1305
 golang.org/x/crypto/nacl/box
 golang.org/x/crypto/nacl/secretbox
+golang.org/x/crypto/pbkdf2
 golang.org/x/crypto/salsa20/salsa
+golang.org/x/crypto/scrypt
 # golang.org/x/sys v0.40.0
 ## explicit; go 1.24.0
 golang.org/x/sys/cpu
@@ -214,10 +218,6 @@ golang.org/x/text/internal/utf8internal
 golang.org/x/text/runes
 golang.org/x/text/transform
 golang.org/x/text/unicode/norm
-# gopkg.in/inconshreveable/go-update.v0 v0.0.0-20150814200126-d8b0b1d421aa
-## explicit
-gopkg.in/inconshreveable/go-update.v0
-gopkg.in/inconshreveable/go-update.v0/download
 # gopkg.in/toast.v1 v1.0.0-20180812000517-0a84660828b2
 ## explicit
 gopkg.in/toast.v1

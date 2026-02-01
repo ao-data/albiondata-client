@@ -9,3 +9,13 @@ _vendor-[0-9]*
 scripts/albiondata-client
 albiondata-client-output.txt
 config.yaml
+.secrets
+.DS_Store
+act.sh
+albiondata-client*
+buildall.sh
+run.sh
+*.log
+*.log.*
+
+

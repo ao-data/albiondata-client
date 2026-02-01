@@ -14,10 +14,9 @@ import (
 	"io"
 	"runtime"
 
-	update "gopkg.in/inconshreveable/go-update.v0"
-
-	"github.com/blang/semver"
-	"github.com/google/go-github/github"
+	"github.com/blang/semver/v4"
+	"github.com/google/go-github/v68/github"
+	"github.com/minio/selfupdate"
 )
 
 const (
@@ -27,7 +26,6 @@ const (
 var (
 	ErrorNoBinary        = errors.New("No binary for the update found")
 	defaultHTTPRequester = HTTPRequester{}
-	up                   = update.New()
 )
 
 // Updater is the configuration and runtime data for doing an update.
@@ -52,21 +50,23 @@ func NewUpdater(currentVersion, githubOwner, githubRepo, filePrefix string) *Upd
 }
 
 // BackgroundUpdater is the all in one update solution for ya. :)
-func (u *Updater) BackgroundUpdater() error {
+// Returns true if an update was successfully applied, false otherwise.
+func (u *Updater) BackgroundUpdater() (bool, error) {
 	available, err := u.CheckUpdateAvailable()
 	if err != nil {
-		return err
+		return false, err
 	}
 
 	if available != "" {
 		fmt.Printf("Version %s available, installing now.\n", available)
 		err := u.Update()
 		if err != nil {
-			return err
+			return false, err
 		}
+		return true, nil
 	}
 
-	return nil
+	return false, nil
 }
 
 // CheckUpdateAvailable fetches the latest releases from github and
@@ -96,34 +96,34 @@ func (u *Updater) Update() error {
 	if runtime.GOOS == "windows" {
 		reqFilename = u.FilePrefix + platform + ".exe.gz"
 	}
-	var foundAsset github.ReleaseAsset
+	var foundAsset *github.ReleaseAsset
 	for _, asset := range u.latestReleasesResp.Assets {
-		if *asset.Name == reqFilename {
+		if asset.GetName() == reqFilename {
 			foundAsset = asset
 			break
 		}
 	}
 
 	// Not found
-	if foundAsset.Name == nil {
+	if foundAsset == nil {
 		return ErrorNoBinary
 	}
 
-	dlURL := *foundAsset.BrowserDownloadURL
+	dlURL := foundAsset.GetBrowserDownloadURL()
 
 	bin, err := u.fetchGZ(dlURL)
 	if err != nil {
 		return err
 	}
 
-	err, errRecover := up.FromStream(bytes.NewReader(bin))
-	if errRecover != nil {
-		return fmt.Errorf("Update and recovery errors: %q %q", err, errRecover)
-	}
+	err = selfupdate.Apply(bytes.NewReader(bin), selfupdate.Options{})
 	if err != nil {
-		return err
+		if rerr := selfupdate.RollbackError(err); rerr != nil {
+			return fmt.Errorf("update failed and rollback also failed: %v", rerr)
+		}
+		return fmt.Errorf("update failed: %v", err)
 	}
-	fmt.Println("Update installed, please restart the program.")
+	fmt.Println("Update installed successfully.")
 	return nil
 }
 

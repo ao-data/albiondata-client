@@ -2,8 +2,11 @@ package client
 
 import (
 	"flag"
+	"fmt"
 	"io"
 	"os"
+	"path/filepath"
+	"regexp"
 	"strconv"
 	"strings"
 
@@ -13,6 +16,33 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 )
+
+const (
+	logFileName = "albiondata-client.log"
+	maxLogFiles = 10
+)
+
+// ansiStripWriter wraps an io.Writer and strips ANSI escape codes before writing
+type ansiStripWriter struct {
+	writer io.Writer
+	regex  *regexp.Regexp
+}
+
+// newAnsiStripWriter creates a writer that strips ANSI escape codes
+func newAnsiStripWriter(w io.Writer) *ansiStripWriter {
+	return &ansiStripWriter{
+		writer: w,
+		// Matches ANSI escape sequences like \x1b[0m, \x1b[36m, etc.
+		regex: regexp.MustCompile(`\x1b\[[0-9;]*m`),
+	}
+}
+
+func (w *ansiStripWriter) Write(p []byte) (n int, err error) {
+	stripped := w.regex.ReplaceAll(p, []byte{})
+	_, err = w.writer.Write(stripped)
+	// Return original length to satisfy io.Writer contract
+	return len(p), err
+}
 
 type config struct {
 	AllowedWSHosts                 []string
@@ -29,7 +59,6 @@ type config struct {
 	EnableWebsockets               bool
 	ListenDevices                  string
 	LogLevel                       string
-	LogToFile                      bool
 	Minimize                       bool
 	Offline                        bool
 	OfflinePath                    string
@@ -38,12 +67,15 @@ type config struct {
 	PublicIngestBaseUrls           string
 	NoCPULimit                     bool
 	PrintVersion                   bool
+	UpdateGithubOwner              string
+	UpdateGithubRepo               string
 }
 
 // config global config data
 var ConfigGlobal = &config{
-	LogLevel: "INFO",
-}
+	LogLevel:          "INFO",
+	UpdateGithubOwner: "ao-data",
+	UpdateGithubRepo:  "albiondata-client"}
 
 func (config *config) SetupFlags() {
 	config.setupWebsocketFlags()
@@ -84,6 +116,15 @@ func (config *config) setupWebsocketFlags() {
 
 	config.EnableWebsockets = viper.GetBool("EnableWebsockets")
 	config.AllowedWSHosts = viper.GetStringSlice("AllowedWebsocketHosts")
+
+	// // Keeping for local development, but commenting out so it's not live.
+	// // Read update configuration (use defaults if not specified)
+	// if viper.IsSet("UpdateGithubOwner") {
+	// 	config.UpdateGithubOwner = viper.GetString("UpdateGithubOwner")
+	// }
+	// if viper.IsSet("UpdateGithubRepo") {
+	// 	config.UpdateGithubRepo = viper.GetString("UpdateGithubRepo")
+	// }
 }
 
 func (config *config) setupDebugFlags() {
@@ -167,13 +208,6 @@ func (config *config) setupCommonFlags() {
 		"Listen on this comma separated devices instead of all available. (Windows: Use MAC-Address, Linux: Use interface name)",
 	)
 
-	flag.BoolVar(
-		&config.LogToFile,
-		"output-file",
-		false,
-		"Enable logging to file.",
-	)
-
 	flag.StringVar(
 		&config.OfflinePath,
 		"o",
@@ -225,19 +259,53 @@ func (config *config) setupLogs() {
 
 	log.SetLevel(level)
 
-	if config.LogToFile {
-		log.SetFormatter(&logrus.TextFormatter{DisableTimestamp: true, DisableSorting: true, ForceColors: false})
-		f, err := os.OpenFile("albiondata-client-output.txt", os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0755)
-		if err == nil {
-			multiWriter := io.MultiWriter(os.Stdout, f)
-			log.SetOutput(multiWriter)
-		} else {
-			log.SetOutput(os.Stdout)
-		}
+	// Rotate existing log files before creating new one
+	rotateLogFiles()
+
+	// Always log to both file and terminal
+	// Use colors for terminal, strip ANSI codes for file
+	log.SetFormatter(&logrus.TextFormatter{FullTimestamp: true, DisableSorting: true, ForceColors: true})
+	f, err := os.OpenFile(logFileName, os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0644)
+	if err == nil {
+		// Wrap file writer to strip ANSI codes
+		strippedFileWriter := newAnsiStripWriter(f)
+		multiWriter := io.MultiWriter(colorable.NewColorableStdout(), strippedFileWriter)
+		log.SetOutput(multiWriter)
 	} else {
-		log.SetFormatter(&logrus.TextFormatter{FullTimestamp: true, DisableSorting: true, ForceColors: true})
 		log.SetOutput(colorable.NewColorableStdout())
+		log.Warnf("Could not create log file: %v", err)
 	}
+}
+
+// rotateLogFiles moves the current log file to a numbered backup and removes old backups
+func rotateLogFiles() {
+	// Check if current log file exists
+	if _, err := os.Stat(logFileName); os.IsNotExist(err) {
+		return // No log file to rotate
+	}
+
+	// Remove the oldest log file if we're at the limit
+	oldestLog := fmt.Sprintf("%s.%d", logFileName, maxLogFiles)
+	_ = os.Remove(oldestLog)
+
+	// Shift all existing log files up by one number
+	for i := maxLogFiles - 1; i >= 1; i-- {
+		oldName := fmt.Sprintf("%s.%d", logFileName, i)
+		newName := fmt.Sprintf("%s.%d", logFileName, i+1)
+		_ = os.Rename(oldName, newName)
+	}
+
+	// Rename current log file to .1
+	_ = os.Rename(logFileName, fmt.Sprintf("%s.1", logFileName))
+}
+
+// GetLogFilePath returns the full path to the current log file
+func GetLogFilePath() string {
+	absPath, err := filepath.Abs(logFileName)
+	if err != nil {
+		return logFileName
+	}
+	return absPath
 }
 
 func (config *config) setupDebugEvents() {

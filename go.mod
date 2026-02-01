@@ -3,7 +3,7 @@ module github.com/ao-data/albiondata-client
 go 1.24.0
 
 require (
-	github.com/ao-data/go-githubupdate v0.0.0-20230216133638-c4accecc2f64
+	github.com/ao-data/go-githubupdate v0.0.0-20260201170319-c56c2e714903
 	github.com/ao-data/photon-spectator v0.0.0-20260131231036-42f34c5bea4d
 	github.com/ctcpip/notifize v1.0.1
 	github.com/getlantern/systray v1.2.2
@@ -20,7 +20,8 @@ require (
 )
 
 require (
-	github.com/blang/semver v3.5.1+incompatible // indirect
+	aead.dev/minisign v0.3.0 // indirect
+	github.com/blang/semver/v4 v4.0.0 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/getlantern/context v0.0.0-20220418194847-3d5e7a086201 // indirect
 	github.com/getlantern/errors v1.0.4 // indirect
@@ -31,12 +32,11 @@ require (
 	github.com/go-stack/stack v1.8.1 // indirect
 	github.com/go-viper/mapstructure/v2 v2.5.0 // indirect
 	github.com/golang/protobuf v1.3.2 // indirect
-	github.com/google/go-github v17.0.0+incompatible // indirect
+	github.com/google/go-github/v68 v68.0.0 // indirect
 	github.com/google/go-querystring v1.2.0 // indirect
 	github.com/hashicorp/golang-lru/v2 v2.0.7 // indirect
-	github.com/kardianos/osext v0.0.0-20190222173326-2bc1f35cddc0 // indirect
-	github.com/kr/binarydist v0.1.0 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
+	github.com/minio/selfupdate v0.6.0 // indirect
 	github.com/oxtoacart/bpool v0.0.0-20190530202638-03653db5a59c // indirect
 	github.com/pelletier/go-toml/v2 v2.2.4 // indirect
 	github.com/sagikazarmark/locafero v0.12.0 // indirect
@@ -50,7 +50,6 @@ require (
 	go.yaml.in/yaml/v3 v3.0.4 // indirect
 	golang.org/x/crypto v0.47.0 // indirect
 	golang.org/x/text v0.33.0 // indirect
-	gopkg.in/inconshreveable/go-update.v0 v0.0.0-20150814200126-d8b0b1d421aa // indirect
 )
 
 require (

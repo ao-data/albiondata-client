@@ -75,8 +75,7 @@ type config struct {
 var ConfigGlobal = &config{
 	LogLevel:          "INFO",
 	UpdateGithubOwner: "ao-data",
-	UpdateGithubRepo:  "albiondata-client",
-}
+	UpdateGithubRepo:  "albiondata-client"}
 
 func (config *config) SetupFlags() {
 	config.setupWebsocketFlags()
@@ -118,13 +117,14 @@ func (config *config) setupWebsocketFlags() {
 	config.EnableWebsockets = viper.GetBool("EnableWebsockets")
 	config.AllowedWSHosts = viper.GetStringSlice("AllowedWebsocketHosts")
 
-	// Read update configuration (use defaults if not specified)
-	if viper.IsSet("UpdateGithubOwner") {
-		config.UpdateGithubOwner = viper.GetString("UpdateGithubOwner")
-	}
-	if viper.IsSet("UpdateGithubRepo") {
-		config.UpdateGithubRepo = viper.GetString("UpdateGithubRepo")
-	}
+	// // Keeping for local development, but commenting out so it's not live.
+	// // Read update configuration (use defaults if not specified)
+	// if viper.IsSet("UpdateGithubOwner") {
+	// 	config.UpdateGithubOwner = viper.GetString("UpdateGithubOwner")
+	// }
+	// if viper.IsSet("UpdateGithubRepo") {
+	// 	config.UpdateGithubRepo = viper.GetString("UpdateGithubRepo")
+	// }
 }
 
 func (config *config) setupDebugFlags() {

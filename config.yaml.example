@@ -1,8 +1,3 @@
 # EnableWebsockets: False
 # AllowedWebsocketHosts:
-#  - www.example.com
-#
-# Auto-updater GitHub repository configuration
-# Defaults to ao-data/albiondata-client if not specified
-# UpdateGithubOwner: ao-data
-# UpdateGithubRepo: albiondata-client
+#   - www.example.com

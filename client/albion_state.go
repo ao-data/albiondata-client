@@ -3,6 +3,7 @@ package client
 import (
 	"strings"
 	"regexp"
+	"time"
 
 	"github.com/ao-data/albiondata-client/lib"
 	"github.com/ao-data/albiondata-client/log"
@@ -27,6 +28,7 @@ type albionState struct {
 	AODataServerID       int
 	AODataIngestBaseURL  string
 	WaitingForMarketData bool
+	BanditEventLastTimeSubmitted time.Time
 
 	// A lot of information is sent out but not contained in the response when requesting marketHistory (e.g. ID)
 	// This information is stored in marketHistoryInfo

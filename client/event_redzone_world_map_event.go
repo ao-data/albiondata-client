@@ -1,10 +1,13 @@
 package client
+
 import (
 	"time"
-	"github.com/ao-data/albiondata-client/log"
+
 	"github.com/ao-data/albiondata-client/lib"
+	"github.com/ao-data/albiondata-client/log"
 	uuid "github.com/nu7hatch/gouuid"
 )
+
 /*
 The event is received when the world map is opened or dragged and sometimes randomly?.
 
@@ -20,12 +23,12 @@ _OR_
   * Gives the timestamp of when the event ends
 */
 
-type eventRedZoneWorldEvent struct {
-	EventTime int64 `mapstructure:"0"`
-	AdvanceNotice bool `mapstructure:"1"`
+type eventRedZoneWorldMapEvent struct {
+	EventTime     int64 `mapstructure:"0"`
+	AdvanceNotice bool  `mapstructure:"1"`
 }
 
-func (event eventRedZoneWorldEvent) Process(state *albionState) {
+func (event eventRedZoneWorldMapEvent) Process(state *albionState) {
 	log.Debug("Got red zone world event...")
 
 	if state.BanditEventLastTimeSubmitted.IsZero() || time.Since(state.BanditEventLastTimeSubmitted).Seconds() >= 60 {
@@ -36,10 +39,10 @@ func (event eventRedZoneWorldEvent) Process(state *albionState) {
 		} else {
 			log.Infof("Bandit Event detected ending at %d", event.EventTime)
 		}
-		
+
 		identifier, _ := uuid.NewV4()
 		upload := lib.BanditEvent{
-			EventTime: event.EventTime,
+			EventTime:     event.EventTime,
 			AdvanceNotice: event.AdvanceNotice,
 		}
 		log.Infof("Sending bandit event to ingest (Identifier: %s)", identifier)

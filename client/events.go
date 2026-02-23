@@ -478,9 +478,10 @@ const (
 	evXignCodeEvent
 	evBatchUseItemStart
 	evBatchUseItemEnd
-	evRedZoneEventClusterStatus
 	evRedZonePlayerNotification
-	evRedZoneWorldEvent
+	evRedZoneEventCheatCleanup
+	evRedZoneFortressEventChestOpened
+	evRedZoneWorldMapEvent
 	evFactionWarfareStats
 	evUpdateFactionBalanceFactors
 	evFactionEnlistmentChanged
@@ -668,4 +669,7 @@ const (
 	evFactionDuchySupplyWarDefensiveVictoryEvent
 	evFactionDuchyReconnectedFromCutoffEvent
 	evFactionFortressCutoffFightCancelledByClusterOwnerChangeEvent
+	evFactionDuchyEnteredCutoffStateEvent
+	evRedZoneEventStandings
+	evNewFactionBattleStandardDeliveryStation
 )

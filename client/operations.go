@@ -550,4 +550,5 @@ const (
 	opEvaluatePlatformPerks
 	opLinkAccountToXbox
 	opTravelFactionWarfarePortal
+	opRequestRedZoneEventStandings
 )

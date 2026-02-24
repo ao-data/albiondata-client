@@ -11,21 +11,18 @@ import (
 /*
 The event is received when the world map is opened or dragged and sometimes randomly?.
 
-The event can either be
-> EventDataType: [474]evRedZoneWorldEvent - map[0:638997538711438026 1:true 252:474]
-  * Happens 15 minutes before the event actually starts.
-  * Gives the timestamp of when the event starts
+EventDataType: [475]evRedZoneWorldMapEvent - map[0:639075060010075967 1:1 252:475]
+EventDataType: [475]evRedZoneWorldMapEvent - map[0:639075087010222801 1:2 252:475]
+EventDataType: [475]evRedZoneWorldMapEvent - map[0:639075105010297587 1:3 2:[DUCHY_RED_01 DUCHY_RED_05] 252:475]
 
-_OR_
-
-> EventDataType: [474]evRedZoneWorldEvent - map[0:639054601760934861 252:474]
-  * Happens when the event has already started.
-  * Gives the timestamp of when the event ends
+map[0] - Timestamp when the phase ends
+map[1] - Current phase (1-3)
+map[2] - References the provinces in the 3rd phase
 */
 
 type eventRedZoneWorldMapEvent struct {
 	EventTime     int64 `mapstructure:"0"`
-	AdvanceNotice bool  `mapstructure:"1"`
+	Phase         int   `mapstructure:"1"`
 }
 
 func (event eventRedZoneWorldMapEvent) Process(state *albionState) {
@@ -34,16 +31,12 @@ func (event eventRedZoneWorldMapEvent) Process(state *albionState) {
 	if state.BanditEventLastTimeSubmitted.IsZero() || time.Since(state.BanditEventLastTimeSubmitted).Seconds() >= 60 {
 		state.BanditEventLastTimeSubmitted = time.Now()
 
-		if event.AdvanceNotice {
-			log.Infof("Bandit Event detected starting at %d", event.EventTime)
-		} else {
-			log.Infof("Bandit Event detected ending at %d", event.EventTime)
-		}
+		log.Infof("Bandit Event detected (Phase: %d) ending at %d", event.Phase, event.EventTime)
 
 		identifier, _ := uuid.NewV4()
 		upload := lib.BanditEvent{
 			EventTime:     event.EventTime,
-			AdvanceNotice: event.AdvanceNotice,
+			Phase:         event.Phase,
 		}
 		log.Infof("Sending bandit event to ingest (Identifier: %s)", identifier)
 		sendMsgToPublicUploaders(upload, lib.NatsBanditEvent, state, identifier.String())

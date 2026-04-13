@@ -4,24 +4,24 @@ import (
 	"encoding/gob"
 	"os"
 
+	"github.com/ao-data/albiondata-client/client/photon"
 	"github.com/ao-data/albiondata-client/log"
-	photon "github.com/ao-data/photon-spectator"
 )
 
-//Router struct definitions
+// Router struct definitions
 type Router struct {
-	albionstate         *albionState
-	newOperation        chan operation
-	recordPhotonCommand chan photon.PhotonCommand
-	quit                chan bool
+	albionstate     *albionState
+	newOperation    chan operation
+	recordRawPacket chan photon.RawPacket
+	quit            chan bool
 }
 
 func newRouter() *Router {
 	return &Router{
-		albionstate:         &albionState{LocationId: ""},
-		newOperation:        make(chan operation, 1000),
-		recordPhotonCommand: make(chan photon.PhotonCommand, 1000),
-		quit:                make(chan bool, 1),
+		albionstate:     &albionState{LocationId: ""},
+		newOperation:    make(chan operation, 1000),
+		recordRawPacket: make(chan photon.RawPacket, 1000),
+		quit:            make(chan bool, 1),
 	}
 }
 
@@ -50,11 +50,11 @@ func (r *Router) run() {
 			return
 		case op := <-r.newOperation:
 			go op.Process(r.albionstate)
-		case command := <-r.recordPhotonCommand:
+		case raw := <-r.recordRawPacket:
 			if encoder != nil {
-				err := encoder.Encode(command)
+				err := encoder.Encode(raw)
 				if err != nil {
-					log.Error("Could not encode command ", err)
+					log.Error("Could not encode raw packet ", err)
 				}
 			}
 		}

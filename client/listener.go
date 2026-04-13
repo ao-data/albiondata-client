@@ -1,14 +1,15 @@
 package client
 
 import (
-	"encoding/base64"
 	"encoding/gob"
 	"fmt"
 	"io"
 	"os"
+	"regexp"
+	"strings"
 
+	"github.com/ao-data/albiondata-client/client/photon"
 	"github.com/ao-data/albiondata-client/log"
-	photon "github.com/ao-data/photon-spectator"
 	"github.com/google/gopacket"
 	"github.com/google/gopacket/layers"
 	"github.com/google/gopacket/pcap"
@@ -17,20 +18,22 @@ import (
 type listener struct {
 	handle        *pcap.Handle
 	sourcePackets chan gopacket.Packet
-	commands      chan photon.PhotonCommand
+	rawCommands   chan photon.RawPacket
 	displayName   string
-	fragments     *photon.FragmentBuffer
+	parser        *photon.PhotonParser
 	quit          chan bool
 	router        *Router
 }
 
 func newListener(router *Router) *listener {
-	return &listener{
-		fragments: photon.NewFragmentBuffer(),
-		commands:  make(chan photon.PhotonCommand, 1),
-		quit:      make(chan bool, 1),
-		router:    router,
+	l := &listener{
+		rawCommands: make(chan photon.RawPacket, 1),
+		quit:        make(chan bool, 1),
+		router:      router,
 	}
+	l.parser = photon.NewPhotonParser(l.onRequest, l.onResponse, l.onEvent)
+	l.parser.OnEncrypted = l.onEncrypted
+	return l
 }
 
 func (l *listener) startOnline(device string, port int) {
@@ -45,8 +48,6 @@ func (l *listener) startOnline(device string, port int) {
 		log.Panic(err)
 	}
 
-	layers.RegisterUDPPortLayerType(layers.UDPPort(port), photon.PhotonLayerType)
-	layers.RegisterTCPPortLayerType(layers.TCPPort(port), photon.PhotonLayerType)
 	source := gopacket.NewPacketSource(l.handle, l.handle.LinkType())
 	l.sourcePackets = source.Packets()
 
@@ -61,10 +62,6 @@ func (l *listener) startOfflinePcap(path string) {
 	}
 	l.handle = handle
 
-	for _, port := range []int{5055, 5056} {
-		layers.RegisterUDPPortLayerType(layers.UDPPort(port), photon.PhotonLayerType)
-		layers.RegisterTCPPortLayerType(layers.TCPPort(port), photon.PhotonLayerType)
-	}
 	source := gopacket.NewPacketSource(handle, handle.LinkType())
 	l.sourcePackets = source.Packets()
 
@@ -86,19 +83,19 @@ func (l *listener) startOfflineCommandGob(path string) {
 
 	go func() {
 		for {
-			command := &photon.PhotonCommand{}
+			raw := &photon.RawPacket{}
 			if decoder == nil {
 				break
 			}
-			err = decoder.Decode(command)
+			err = decoder.Decode(raw)
 			if err != nil {
 				if err == io.EOF {
 					break
 				}
-				log.Error("Could not decode command ", err)
+				log.Error("Could not decode raw packet ", err)
 				continue
 			}
-			l.commands <- *command
+			l.rawCommands <- *raw
 		}
 
 		err = file.Close()
@@ -107,11 +104,6 @@ func (l *listener) startOfflineCommandGob(path string) {
 		}
 		log.Info("All offline commands should processed now.")
 	}()
-
-	for _, port := range []int{5055, 5056} {
-		layers.RegisterUDPPortLayerType(layers.UDPPort(port), photon.PhotonLayerType)
-		layers.RegisterTCPPortLayerType(layers.TCPPort(port), photon.PhotonLayerType)
-	}
 
 	l.displayName = fmt.Sprintf("Offline Commands: %s", path)
 	l.run()
@@ -134,8 +126,8 @@ func (l *listener) run() {
 				l.handle.Close()
 				return
 			}
-		case command := <-l.commands:
-			l.onReliableCommand(&command)
+		case raw := <-l.rawCommands:
+			l.parser.ReceivePacket(raw.Payload)
 		}
 	}
 }
@@ -147,129 +139,165 @@ func (l *listener) stop() {
 
 func (l *listener) processPacket(packet gopacket.Packet) {
 	ipLayer := packet.Layer(layers.LayerTypeIPv4)
-
 	if ipLayer == nil {
 		return
 	}
 
 	ipv4 := ipLayer.(*layers.IPv4)
-
-	if ipLayer != nil {
-		ipv4, _ = ipLayer.(*layers.IPv4)
-		log.Tracef("Packet came from: %s", ipv4.SrcIP)
-	}
+	log.Tracef("Packet came from: %s", ipv4.SrcIP)
 
 	if ipv4.SrcIP == nil {
 		log.Trace("No IPv4 detected")
 		return
 	}
+
 	l.router.albionstate.GameServerIP = ipv4.SrcIP.String()
 	l.router.albionstate.AODataServerID, l.router.albionstate.AODataIngestBaseURL = l.router.albionstate.GetServer()
-	log.Tracef("Server ID: %s", l.router.albionstate.AODataServerID)
+	log.Tracef("Server ID: %d", l.router.albionstate.AODataServerID)
 	log.Tracef("Using AODataIngestBaseURL: %s", l.router.albionstate.AODataIngestBaseURL)
 
-	layer := packet.Layer(photon.PhotonLayerType)
+	// Extract the raw Photon payload from the UDP or TCP layer.
+	var payload []byte
+	if udpLayer := packet.Layer(layers.LayerTypeUDP); udpLayer != nil {
+		payload = udpLayer.(*layers.UDP).Payload
+	} else if tcpLayer := packet.Layer(layers.LayerTypeTCP); tcpLayer != nil {
+		payload = tcpLayer.(*layers.TCP).Payload
+	}
 
-	if layer == nil {
+	if len(payload) == 0 {
 		return
 	}
 
-	content, _ := layer.(photon.PhotonLayer)
+	if ConfigGlobal.RecordPath != "" {
+		l.router.recordRawPacket <- photon.RawPacket{Payload: payload}
+	}
 
-	for _, command := range content.Commands {
-		switch command.Type {
-		case photon.SendReliableType:
-			l.onReliableCommand(&command)
-		case photon.SendUnreliableType:
-			var s = make([]byte, len(command.Data)-4)
-			copy(s, command.Data[4:])
-			command.Data = s
-			command.Length -= 4
-			command.Type = 6
-			l.onReliableCommand(&command)
-		case photon.SendReliableFragmentType:
-			msg, _ := command.ReliableFragment()
-			result := l.fragments.Offer(msg)
-			if result != nil {
-				l.onReliableCommand(result)
-			}
-		}
+	l.parser.ReceivePacket(payload)
+}
+
+func (l *listener) onEncrypted() {
+	if l.router.albionstate.WaitingForMarketData {
+		l.router.albionstate.WaitingForMarketData = false
+		log.Info("Market data is encrypted. Please see https://www.albion-online-data.com/client/encryption.html for more information.")
 	}
 }
 
-func (l *listener) onReliableCommand(command *photon.PhotonCommand) {
-	// Record all photon commands even if the params did not parse correctly
-	if ConfigGlobal.RecordPath != "" {
-		l.router.recordPhotonCommand <- *command
+func (l *listener) onRequest(opCode byte, params map[byte]interface{}) {
+	if _, ok := params[253]; !ok {
+		params[253] = uint16(opCode)
 	}
 
-	msg, err := command.ReliableMessage()
-	if err != nil {
-
-		if fmt.Sprint(err) == "Encryption not supported" && l.router.albionstate.WaitingForMarketData == true {
-			l.router.albionstate.WaitingForMarketData = false
-			log.Info("Market data is encrypted. Please see https://www.albion-online-data.com/client/encryption.html for more information.")
-		}
-
-		if !ConfigGlobal.DebugIgnoreDecodingErrors {
-			log.Debugf("Could not decode reliable message: %v - %v", err, base64.StdEncoding.EncodeToString(command.Data))
-		}
-		return
-	}
-	params := photon.DecodeReliableMessage(msg)
-	if params == nil {
-		if !ConfigGlobal.DebugIgnoreDecodingErrors {
-			log.Debugf("ERROR: Could not decode params: [%d] (%d) (%d) %v", msg.Type, msg.ParameterCount, len(msg.Data), base64.StdEncoding.EncodeToString(msg.Data))
-		}
-		return
-	}
-
-	var operation operation
-
-	switch msg.Type {
-	case photon.OperationRequest:
-		operation, err = decodeRequest(params)
-		if params[253] != nil {
-			number := params[253].(int16)
+	operation, err := decodeRequest(params)
+	if params[253] != nil {
+		if number, ok := toUint16(params[253]); ok {
 			shouldDebug, exists := ConfigGlobal.DebugOperations[int(number)]
 			if (exists && shouldDebug) || (!exists && ConfigGlobal.DebugOperationsString == "") {
-				log.Debugf("OperationRequest: [%v]%v - %v", number, OperationType(number), params)
+				log.Debugf("OperationRequest: [%v]%v - %s", number, OperationType(number), formatDebugPhotonParams(params))
 			}
-		} else if !ConfigGlobal.DebugIgnoreDecodingErrors {
-			log.Debugf("OperationRequest: ERROR - %v", params)
+		} else {
+			log.Debugf("OperationRequest: unexpected type for params[253]: %T = %s", params[253], formatDebugValue(params[253], 0))
 		}
-	case photon.OperationResponse:
-		operation, err = decodeResponse(params)
-		if params[253] != nil {
-			number := params[253].(int16)
+	} else if !ConfigGlobal.DebugIgnoreDecodingErrors {
+		log.Debugf("OperationRequest: ERROR - %s", formatDebugPhotonParams(params))
+	}
+
+	l.dispatchOperation(operation, err, params)
+}
+
+func (l *listener) onResponse(opCode byte, returnCode int16, _ string, params map[byte]interface{}) {
+	if _, ok := toUint16(params[253]); !ok {
+		params[253] = uint16(opCode)
+	}
+
+	// Market order data arrives as params[0]=[]string (set by dispatchResponse in parser).
+	if _, ok := params[0].([]string); ok {
+		params[253] = uint16(opAuctionGetOffers)
+	}
+
+	if returnCode != 0 {
+		rc := uint16(returnCode)
+		name := returnCodeName(rc)
+		if name == "" {
+			name = "Unknown"
+		}
+		if number, ok := toUint16(params[253]); ok {
+			log.Debugf("OperationResponse: rc=%d(%s) op=[%v]%v", returnCode, name, number, OperationType(number))
+		} else {
+			log.Debugf("OperationResponse: rc=%d(%s)", returnCode, name)
+		}
+	}
+
+	operation, err := decodeResponse(params)
+	if params[253] != nil {
+		if number, ok := toUint16(params[253]); ok {
 			shouldDebug, exists := ConfigGlobal.DebugOperations[int(number)]
 			if (exists && shouldDebug) || (!exists && ConfigGlobal.DebugOperationsString == "") {
-				log.Debugf("OperationResponse: [%v]%v - %v", number, OperationType(number), params)
+				log.Debugf("OperationResponse: [%v]%v - %s", number, OperationType(number), formatDebugPhotonParams(params))
 			}
-		} else if !ConfigGlobal.DebugIgnoreDecodingErrors {
-			log.Debugf("OperationResponse: ERROR - %v", params)
+		} else {
+			log.Debugf("OperationResponse: unexpected type for params[253]: %T = %s", params[253], formatDebugValue(params[253], 0))
 		}
-	case photon.EventDataType:
-		operation, err = decodeEvent(params)
-		if params[252] != nil {
-			number := params[252].(int16)
+	} else if !ConfigGlobal.DebugIgnoreDecodingErrors {
+		log.Debugf("OperationResponse: ERROR - %s", formatDebugPhotonParams(params))
+	}
+
+	l.dispatchOperation(operation, err, params)
+}
+
+func (l *listener) onEvent(code byte, params map[byte]interface{}) {
+	if _, ok := toUint16(params[252]); !ok {
+		params[252] = uint16(code)
+	}
+
+	operation, err := decodeEvent(params)
+	if params[252] != nil {
+		if number, ok := toUint16(params[252]); ok {
 			shouldDebug, exists := ConfigGlobal.DebugEvents[int(number)]
 			if (exists && shouldDebug) || (!exists && ConfigGlobal.DebugEventsString == "") {
-				log.Debugf("EventDataType: [%v]%v - %v", number, EventType(number), params)
+				log.Debugf("EventDataType: [%v]%v - %s", number, EventType(number), formatDebugPhotonParams(params))
 			}
-		} else if !ConfigGlobal.DebugIgnoreDecodingErrors {
-			log.Debugf("EventDataType: ERROR - %v", params)
+		} else {
+			log.Debugf("EventDataType: unexpected type for params[252]: %T = %s", params[252], formatDebugValue(params[252], 0))
 		}
-	default:
-		err = fmt.Errorf("unsupported message type: %v, data: %v", msg.Type, base64.StdEncoding.EncodeToString(msg.Data))
+	} else if !ConfigGlobal.DebugIgnoreDecodingErrors {
+		log.Debugf("EventDataType: ERROR - %s", formatDebugPhotonParams(params))
 	}
 
+	l.dispatchOperation(operation, err, params)
+}
+
+func (l *listener) dispatchOperation(op operation, err error, params map[byte]interface{}) {
 	if err != nil && !ConfigGlobal.DebugIgnoreDecodingErrors {
-		log.Debugf("Error while decoding an event or operation: %v - params: %v", err, params)
-		operation = nil
+		log.Debugf("Error while decoding an event or operation: %v - params: %s", err, formatDebugPhotonParams(params))
+		return
 	}
-
-	if operation != nil {
-		l.router.newOperation <- operation
+	if op != nil {
+		l.router.newOperation <- op
 	}
 }
+
+func normalizeLocationID(v string) string {
+	s := strings.TrimSpace(strings.Trim(v, ",."))
+	if s == "" {
+		return ""
+	}
+	reIsland := regexp.MustCompile(`(?i)@island@[0-9a-f-]{36}`)
+	if m := reIsland.FindString(s); m != "" {
+		return "@ISLAND@" + m[len("@island@"):]
+	}
+	reNumeric := regexp.MustCompile(`^[0-9]{3,6}$`)
+	if reNumeric.MatchString(s) {
+		return s
+	}
+	ls := strings.ToLower(s)
+	if strings.HasPrefix(ls, "island-player-") ||
+		strings.HasPrefix(ls, "@player-island") ||
+		strings.HasPrefix(ls, "@island-") ||
+		strings.HasPrefix(s, "BLACKBANK-") ||
+		strings.HasSuffix(s, "-HellDen") ||
+		strings.HasSuffix(s, "-Auction2") {
+		return s
+	}
+	return ""
+}
+

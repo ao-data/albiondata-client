@@ -64,5 +64,5 @@ func (op operationGetMailInfosResponse) Process(state *albionState) {
 		return
 	}
 
-	log.Infof("Mail Infos - Cached %#d mail infos", len(MailInfos))
+	log.Infof("Mail Infos - Cached %d mail infos", len(MailInfos))
 }

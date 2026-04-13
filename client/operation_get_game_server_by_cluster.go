@@ -1,10 +1,7 @@
 package client
 
 import (
-//	"strconv"
-//	"strings"
-
-//	"github.com/ao-data/albiondata-client/log"
+	"github.com/ao-data/albiondata-client/log"
 )
 
 type operationGetGameServerByCluster struct {
@@ -12,18 +9,13 @@ type operationGetGameServerByCluster struct {
 }
 
 func (op operationGetGameServerByCluster) Process(state *albionState) {
-	// log.Debug("Got GetGameServerByCluster operation...")
-
-	// state.LocationString = op.ZoneID
-	// // TODO: Fix hack for second caerleon marketplace
-	// // Most likely will need to only use strings for player location in client
-	// zoneInt, err := strconv.Atoi(strings.Replace(op.ZoneID, "-Auction2", "", -1))
-	// if err != nil {
-	// 	log.Debugf("Unable to convert zoneID to int. Probably an instance.. ZoneID: %v", op.ZoneID)
-	// 	state.LocationId = -2 // hack
-	// 	return
-	// }
-
-	// log.Infof("Updating player location to %v.", zoneInt)
-	// state.LocationId = zoneInt
+	location := normalizeLocationID(op.ZoneID)
+	if location == "" {
+		log.Debugf("Ignoring implausible GetGameServerByCluster zone value: %q", op.ZoneID)
+		return
+	}
+	if state.LocationId != location {
+		log.Infof("(operationGetGameServerByCluster) Updating player location to %v.", location)
+		state.LocationId = location
+	}
 }

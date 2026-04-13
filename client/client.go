@@ -1,6 +1,7 @@
 package client
 
 import (
+	"os"
 	"time"
 
 	"github.com/ao-data/albiondata-client/log"
@@ -32,12 +33,9 @@ func (client *Client) Run() error {
 	if ConfigGlobal.Offline {
 		processOffline(ConfigGlobal.OfflinePath)
 
-		// TODO: get rid of this, some kind of stupid delay locally when hitting /pow on local dev server, fix it
-		n := 1
-		for n < 5000 {
-			time.Sleep(1 * time.Millisecond)
-			n++
-		}
+		// Allow time for any async uploads/processing to complete, then exit.
+		time.Sleep(10 * time.Second)
+		os.Exit(0)
 
 	} else {
 		apw := newAlbionProcessWatcher()

@@ -178,6 +178,8 @@ const (
 	evMatchPlayerStatsEvent
 	evMatchPlayerStatsCompleteEvent
 	evMatchTimeLineEventEvent
+	evMatchNewCombatRound
+	evMatchEndCombatRound
 	evMatchPlayerMainGearStatsEvent
 	evMatchPlayerChangedAvatarEvent
 	evInvitationPlayerTrade
@@ -670,6 +672,21 @@ const (
 	evFactionDuchyReconnectedFromCutoffEvent
 	evFactionFortressCutoffFightCancelledByClusterOwnerChangeEvent
 	evFactionDuchyEnteredCutoffStateEvent
+	evLeaveProtectionStateUpdate
 	evRedZoneEventStandings
 	evNewFactionBattleStandardDeliveryStation
+	evNewLoreSnippetObject
+	evLoreSnippetObjectStateUpdate
+	evLoreSnippedClaimed
+	evLoreSnippetStatesChangedByCheat
+	evNewTeleporterNode
+	evTeleporterNodeStateChanged
+	evTeleporterConnectionsFullStateUpdate
+	evTeleporterConnectionStateChanged
+	evRetrieveCarriableObjectStart
+	evRetrieveCarriableObjectCancel
+	evRetrieveCarriableObjectReset
+	evRetrieveCarriableObjectFinished
+	evLosingCarriableObjectStart
+	evLosingCarriableObjectFinished
 )

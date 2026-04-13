@@ -41,7 +41,6 @@ func main() {
 	} else {
 		go systray.Run()
 		// runClient()
-		log.Info("Client is currently broken after today's (2025-04-13) update. We are working on the issue. An update will be released when it is fixed. Please see https://www.albion-online-data.com/client/ for updates.")
 	}
 }
 

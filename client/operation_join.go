@@ -23,10 +23,9 @@ func (op operationJoinResponse) Process(state *albionState) {
 	// of SetServerID() incase the player switched servers
 	state.AODataServerID = 0
 
-	log.Infof("op.Location: %v", op.Location)
 	location := normalizeLocationID(op.Location)
 	if location != "" {
-		log.Infof("(operationJoinResponse) Updating player location to %v.", location)
+		log.Infof("Updating player location to %v.", location)
 		state.LocationId = location
 	} else {
 		log.Debugf("Ignoring implausible join location value: %q", op.Location)

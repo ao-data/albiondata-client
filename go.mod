@@ -4,7 +4,6 @@ go 1.24.0
 
 require (
 	github.com/ao-data/go-githubupdate v0.0.0-20260201170319-c56c2e714903
-	github.com/ao-data/photon-spectator v0.0.0-20260131231036-42f34c5bea4d
 	github.com/ctcpip/notifize v1.0.1
 	github.com/getlantern/systray v1.2.2
 	github.com/gonutz/w32 v1.0.0
@@ -34,7 +33,6 @@ require (
 	github.com/golang/protobuf v1.3.2 // indirect
 	github.com/google/go-github/v68 v68.0.0 // indirect
 	github.com/google/go-querystring v1.2.0 // indirect
-	github.com/hashicorp/golang-lru/v2 v2.0.7 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/minio/selfupdate v0.6.0 // indirect
 	github.com/oxtoacart/bpool v0.0.0-20190530202638-03653db5a59c // indirect

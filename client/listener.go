@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"regexp"
+	"strings"
 
 	"github.com/ao-data/albiondata-client/log"
 	photon "github.com/ao-data/photon-spectator"
@@ -154,18 +156,16 @@ func (l *listener) processPacket(packet gopacket.Packet) {
 
 	ipv4 := ipLayer.(*layers.IPv4)
 
-	if ipLayer != nil {
-		ipv4, _ = ipLayer.(*layers.IPv4)
-		log.Tracef("Packet came from: %s", ipv4.SrcIP)
-	}
+	log.Tracef("Packet came from: %s", ipv4.SrcIP)
 
 	if ipv4.SrcIP == nil {
 		log.Trace("No IPv4 detected")
 		return
 	}
+
 	l.router.albionstate.GameServerIP = ipv4.SrcIP.String()
 	l.router.albionstate.AODataServerID, l.router.albionstate.AODataIngestBaseURL = l.router.albionstate.GetServer()
-	log.Tracef("Server ID: %s", l.router.albionstate.AODataServerID)
+	log.Tracef("Server ID: %d", l.router.albionstate.AODataServerID)
 	log.Tracef("Using AODataIngestBaseURL: %s", l.router.albionstate.AODataIngestBaseURL)
 
 	layer := packet.Layer(photon.PhotonLayerType)
@@ -228,48 +228,91 @@ func (l *listener) onReliableCommand(command *photon.PhotonCommand) {
 
 	switch msg.Type {
 	case photon.OperationRequest:
+		if _, ok := params[253]; !ok {
+			params[253] = uint16(msg.OperationCode)
+		}
 		operation, err = decodeRequest(params)
 		if params[253] != nil {
-			number := params[253].(int16)
-			shouldDebug, exists := ConfigGlobal.DebugOperations[int(number)]
-			if (exists && shouldDebug) || (!exists && ConfigGlobal.DebugOperationsString == "") {
-				log.Debugf("OperationRequest: [%v]%v - %v", number, OperationType(number), params)
+			if number, ok := toUint16(params[253]); ok {
+				shouldDebug, exists := ConfigGlobal.DebugOperations[int(number)]
+				if (exists && shouldDebug) || (!exists && ConfigGlobal.DebugOperationsString == "") {
+					log.Debugf("OperationRequest: [%v]%v - %s", number, OperationType(number), formatDebugPhotonParams(params))
+				}
+			} else {
+				log.Debugf("OperationRequest: unexpected type for params[253]: %T = %s", params[253], formatDebugValue(params[253], 0))
 			}
 		} else if !ConfigGlobal.DebugIgnoreDecodingErrors {
-			log.Debugf("OperationRequest: ERROR - %v", params)
+			log.Debugf("OperationRequest: ERROR - %s", formatDebugPhotonParams(params))
 		}
 	case photon.OperationResponse:
+		if _, ok := toUint16(params[253]); !ok {
+			params[253] = uint16(msg.OperationCode)
+		}
 		operation, err = decodeResponse(params)
 		if params[253] != nil {
-			number := params[253].(int16)
-			shouldDebug, exists := ConfigGlobal.DebugOperations[int(number)]
-			if (exists && shouldDebug) || (!exists && ConfigGlobal.DebugOperationsString == "") {
-				log.Debugf("OperationResponse: [%v]%v - %v", number, OperationType(number), params)
+			if number, ok := toUint16(params[253]); ok {
+				shouldDebug, exists := ConfigGlobal.DebugOperations[int(number)]
+				if (exists && shouldDebug) || (!exists && ConfigGlobal.DebugOperationsString == "") {
+					log.Debugf("OperationResponse: [%v]%v - %s", number, OperationType(number), formatDebugPhotonParams(params))
+				}
+			} else {
+				log.Debugf("OperationResponse: unexpected type for params[253]: %T = %s", params[253], formatDebugValue(params[253], 0))
 			}
 		} else if !ConfigGlobal.DebugIgnoreDecodingErrors {
-			log.Debugf("OperationResponse: ERROR - %v", params)
+			log.Debugf("OperationResponse: ERROR - %s", formatDebugPhotonParams(params))
 		}
 	case photon.EventDataType:
+		if _, ok := toUint16(params[252]); !ok {
+			params[252] = uint16(msg.EventCode)
+		}
 		operation, err = decodeEvent(params)
 		if params[252] != nil {
-			number := params[252].(int16)
-			shouldDebug, exists := ConfigGlobal.DebugEvents[int(number)]
-			if (exists && shouldDebug) || (!exists && ConfigGlobal.DebugEventsString == "") {
-				log.Debugf("EventDataType: [%v]%v - %v", number, EventType(number), params)
+			if number, ok := toUint16(params[252]); ok {
+				shouldDebug, exists := ConfigGlobal.DebugEvents[int(number)]
+				if (exists && shouldDebug) || (!exists && ConfigGlobal.DebugEventsString == "") {
+					log.Debugf("EventDataType: [%v]%v - %s", number, EventType(number), formatDebugPhotonParams(params))
+				}
+			} else {
+				log.Debugf("EventDataType: unexpected type for params[252]: %T = %s", params[252], formatDebugValue(params[252], 0))
 			}
 		} else if !ConfigGlobal.DebugIgnoreDecodingErrors {
-			log.Debugf("EventDataType: ERROR - %v", params)
+			log.Debugf("EventDataType: ERROR - %s", formatDebugPhotonParams(params))
 		}
 	default:
 		err = fmt.Errorf("unsupported message type: %v, data: %v", msg.Type, base64.StdEncoding.EncodeToString(msg.Data))
 	}
 
 	if err != nil && !ConfigGlobal.DebugIgnoreDecodingErrors {
-		log.Debugf("Error while decoding an event or operation: %v - params: %v", err, params)
+		log.Debugf("Error while decoding an event or operation: %v - params: %s", err, formatDebugPhotonParams(params))
 		operation = nil
 	}
 
 	if operation != nil {
 		l.router.newOperation <- operation
 	}
+}
+
+func normalizeLocationID(v string) string {
+	s := strings.TrimSpace(strings.Trim(v, ",."))
+	if s == "" {
+		return ""
+	}
+	reIsland := regexp.MustCompile(`(?i)@island@[0-9a-f-]{36}`)
+	if m := reIsland.FindString(s); m != "" {
+		return "@ISLAND@" + m[len("@island@"):]
+	}
+	reNumeric := regexp.MustCompile(`^[0-9]{3,6}$`)
+	if reNumeric.MatchString(s) {
+		return s
+	}
+	ls := strings.ToLower(s)
+	if strings.HasPrefix(ls, "island-player-") ||
+		strings.HasPrefix(ls, "@player-island") ||
+		strings.HasPrefix(ls, "@island-") ||
+		strings.HasPrefix(s, "BLACKBANK-") ||
+		strings.HasSuffix(s, "-HellDen") ||
+		strings.HasSuffix(s, "-Auction2") {
+		return s
+	}
+	return ""
 }

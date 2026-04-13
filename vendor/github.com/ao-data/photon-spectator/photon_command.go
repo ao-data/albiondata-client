@@ -99,9 +99,21 @@ func (c PhotonCommand) ReliableMessage() (msg ReliableMessage, err error) {
 		if paramValue != nil {
 			msg.OperationDebugString = paramValue.(string)
 		}
+	default:
 	}
 
-	binary.Read(buf, binary.BigEndian, &msg.ParameterCount)
+	var countBytes [2]byte
+	if _, readErr := buf.Read(countBytes[:]); readErr != nil {
+		return msg, readErr
+	}
+	beCount := int16(binary.BigEndian.Uint16(countBytes[:]))
+	leCount := int16(binary.LittleEndian.Uint16(countBytes[:]))
+
+	remaining := buf.Len()
+	msg.ParameterCount = beCount
+	if (beCount < 0 || int(beCount) > remaining) && (leCount >= 0 && int(leCount) <= remaining) {
+		msg.ParameterCount = leCount
+	}
 	msg.Data = buf.Bytes()
 
 	return

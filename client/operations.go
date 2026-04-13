@@ -24,6 +24,7 @@ const (
 	opCreateAccount
 	opLogin
 	opCreateGuestAccount
+	opCreatePlatformOnlyAccount
 	opSendCrashLog
 	opSendTraceRoute
 	opSendVfxStats
@@ -51,6 +52,11 @@ const (
 	opInventoryRecoverAllItems
 	opInventorySplitStack
 	opInventorySplitStackInto
+	opInventoryStack
+	opInventoryReorder
+	opInventoryDropAll
+	opInventoryAddToStacks
+	opInventoryMoveGivenItems
 	opGetClusterData
 	opChangeCluster
 	opConsoleCommand
@@ -281,10 +287,6 @@ const (
 	opFriendAnswerInvitation
 	opFriendCancelnvitation
 	opFriendRemove
-	opInventoryStack
-	opInventoryReorder
-	opInventoryDropAll
-	opInventoryAddToStacks
 	opEquipmentItemChangeSpell
 	opExpeditionRegister
 	opExpeditionRegisterCancel
@@ -551,4 +553,8 @@ const (
 	opLinkAccountToXbox
 	opTravelFactionWarfarePortal
 	opRequestRedZoneEventStandings
+	opGetZergDebuffInfo
+	opRequestLoreSnippetStates
+	opRetrieveCarriableObjectStart
+	opRetrieveCarriableObjectCancel
 )

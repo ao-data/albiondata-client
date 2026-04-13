@@ -20,7 +20,7 @@ func (m *MarketOrder) StringArray() []string {
 	return []string{
 		fmt.Sprintf("%d", m.ID),
 		m.ItemID,
-		fmt.Sprintf("%d", m.LocationID),
+		m.LocationID,
 		fmt.Sprintf("%d", m.QualityLevel),
 		fmt.Sprintf("%d", m.EnchantmentLevel),
 		fmt.Sprintf("%d", m.Price),

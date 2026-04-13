@@ -64,7 +64,7 @@ func (op operationAuctionGetItemAverageStatsResponse) Process(state *albionState
 
 	// Still no correlating Request has been processed
 	if state.marketHistoryIDLookup[index].albionId < 1 {
-		log.Warnf("Market History - Market history at index %d is invalid. Has albionId: %s ", index, state.marketHistoryIDLookup[index].albionId)
+		log.Warnf("Market History - Market history at index %d is invalid. Has albionId: %d ", index, state.marketHistoryIDLookup[index].albionId)
 		return
 	}
 

@@ -198,6 +198,8 @@ func (l *listener) processPacket(packet gopacket.Packet) {
 }
 
 func (l *listener) onReliableCommand(command *photon.PhotonCommand) {
+	return
+
 	// Record all photon commands even if the params did not parse correctly
 	if ConfigGlobal.RecordPath != "" {
 		l.router.recordPhotonCommand <- *command

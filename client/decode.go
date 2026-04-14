@@ -153,9 +153,15 @@ func decodeEvent(params map[uint8]interface{}) (event operation, err error) {
 func decodeParams(params map[uint8]interface{}, operation operation) error {
 	convertGameObjects := func(from reflect.Type, to reflect.Type, v interface{}) (interface{}, error) {
 		if from == reflect.TypeOf([]int8{}) && to == reflect.TypeOf(lib.CharacterID("")) {
-			log.Debug("Parsing character ID from mixed-endian UUID")
+			log.Debug("Parsing character ID from mixed-endian UUID (int8)")
 
 			return decodeCharacterID(v.([]int8)), nil
+		}
+
+		if from == reflect.TypeOf([]uint8{}) && to == reflect.TypeOf(lib.CharacterID("")) {
+			log.Debug("Parsing character ID from mixed-endian UUID (uint8)")
+
+			return decodeCharacterIDFromBytes(v.([]uint8)), nil
 		}
 
 		return v, nil
@@ -182,6 +188,28 @@ func decodeParams(params map[uint8]interface{}, operation operation) error {
 	err = decoder.Decode(stringMap)
 
 	return err
+}
+
+func decodeCharacterIDFromBytes(array []uint8) lib.CharacterID {
+	b := make([]byte, len(array))
+	copy(b, array)
+
+	b[0], b[1], b[2], b[3] = b[3], b[2], b[1], b[0]
+	b[4], b[5] = b[5], b[4]
+	b[6], b[7] = b[7], b[6]
+
+	var buf [36]byte
+	hex.Encode(buf[:], b[:4])
+	buf[8] = '-'
+	hex.Encode(buf[9:13], b[4:6])
+	buf[13] = '-'
+	hex.Encode(buf[14:18], b[6:8])
+	buf[18] = '-'
+	hex.Encode(buf[19:23], b[8:10])
+	buf[23] = '-'
+	hex.Encode(buf[24:], b[10:])
+
+	return lib.CharacterID(buf[:])
 }
 
 func decodeCharacterID(array []int8) lib.CharacterID {

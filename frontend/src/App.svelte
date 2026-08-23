@@ -16,26 +16,26 @@
 
 <style>
   :global(:root) {
-    /* ink surfaces */
-    --bg: #131110;
-    --bg-raised: #1b1815;
-    --bg-sunken: #0d0b0a;
-    --border: rgba(237, 230, 216, 0.08);
-    --border-strong: rgba(237, 230, 216, 0.16);
+    /* charcoal surfaces */
+    --bg: #14171c;
+    --bg-raised: #1c2128;
+    --bg-sunken: #0d0f13;
+    --border: rgba(231, 234, 239, 0.08);
+    --border-strong: rgba(231, 234, 239, 0.16);
 
-    /* parchment text */
-    --text: #ede6d8;
-    --text-muted: #9c9284;
-    --text-faint: #6b6459;
+    /* cool text */
+    --text: #e7eaef;
+    --text-muted: #8d94a3;
+    --text-faint: #5a6070;
 
-    /* single accent: lantern amber */
-    --amber: #e0a94a;
-    --amber-bright: #f2c877;
-    --amber-soft: rgba(224, 169, 74, 0.14);
+    /* single accent: electric blue */
+    --blue: #2f8cff;
+    --blue-bright: #5fb4ff;
+    --blue-soft: rgba(47, 140, 255, 0.14);
 
     /* status */
     --ready: var(--text-muted);
-    --ready-soft: rgba(156, 146, 132, 0.12);
+    --ready-soft: rgba(141, 148, 163, 0.12);
     --ember: #c1543f;
     --ember-soft: rgba(193, 84, 63, 0.16);
     --moss: #6d9c5f;

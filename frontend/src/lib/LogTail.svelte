@@ -192,13 +192,13 @@
   }
   .identifier-link,
   .log-link {
-    color: var(--amber-bright);
+    color: var(--blue-bright);
     text-decoration: none;
-    border-bottom: 1px solid rgba(242, 200, 119, 0.35);
+    border-bottom: 1px solid rgba(95, 180, 255, 0.35);
   }
   .identifier-link:hover,
   .log-link:hover {
-    border-bottom-color: var(--amber-bright);
+    border-bottom-color: var(--blue-bright);
   }
   .copy-btn {
     margin-left: 0.35rem;
@@ -215,7 +215,7 @@
     cursor: pointer;
   }
   .copy-btn:hover {
-    color: var(--amber);
+    color: var(--blue);
     border-color: var(--border-strong);
   }
   .level-error .level,
@@ -229,9 +229,9 @@
     color: var(--ember);
   }
   .level-warning .level {
-    color: var(--amber);
+    color: var(--blue);
   }
   .level-warning .message {
-    color: var(--amber);
+    color: var(--blue);
   }
 </style>

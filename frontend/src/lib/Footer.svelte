@@ -52,7 +52,7 @@
     text-decoration: none;
   }
   .links a:hover {
-    color: var(--amber);
+    color: var(--blue);
   }
   .version {
     font-family: var(--font-mono);

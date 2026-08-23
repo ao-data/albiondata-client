@@ -59,7 +59,7 @@
     font-family: var(--font-mono);
     font-size: 0.95rem;
     font-weight: 600;
-    color: var(--amber-bright);
+    color: var(--blue-bright);
     font-variant-numeric: tabular-nums;
     flex-shrink: 0;
   }

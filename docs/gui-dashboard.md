@@ -45,7 +45,7 @@ package that the rest of the client calls into:
 Svelte 5 (runes), Vite. Structure:
 
 - `App.svelte` - top-level layout, owns the design token CSS variables
-  (`--bg`, `--amber`, `--font-display`, etc. in its `<style>` block).
+  (`--bg`, `--blue`, `--font-display`, etc. in its `<style>` block).
   Reuse these tokens for anything new; don't invent colors ad hoc.
 - `lib/Sidebar.svelte` - left column: status badge, Server/Version
   fields, resizable width (drag handle, persisted to `localStorage`),
@@ -69,11 +69,16 @@ Svelte 5 (runes), Vite. Structure:
   version display. Opened via `Browser.OpenURL`, not in-webview
   navigation - these should open in the user's real browser.
 
-Design direction is "watch-house ledger": dark ink background, a
-single amber accent, a serif wordmark used sparingly, monospace for all
-data/numerals. This was a deliberate choice (via the `frontend-design`
-skill) to avoid generic AI-design defaults. Keep it unless explicitly
-asked to redesign.
+Design direction is "charcoal & electric blue": charcoal background
+(`--bg`/`--bg-raised`/`--bg-sunken`), a single electric-blue accent
+(`--blue`/`--blue-bright`/`--blue-soft`), a serif wordmark used
+sparingly, monospace for all data/numerals. Changed from the original
+"watch-house ledger" amber/parchment palette (chosen via the
+`frontend-design` skill) on explicit request - only the color tokens
+changed, not type or layout. `--ember` (error/encrypted-red) and
+`--moss` (clear/good-green) are semantic status colors, not part of
+the base accent, and were deliberately left alone across that change -
+don't fold them into a future palette swap without being asked.
 
 ## Update system: single file, on purpose, on all 3 OSes
 

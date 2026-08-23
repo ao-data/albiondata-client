@@ -183,7 +183,7 @@
   }
   .resize-handle:hover::after,
   .resize-handle.active::after {
-    background: var(--amber);
+    background: var(--blue);
   }
   .brand {
     display: flex;
@@ -263,8 +263,8 @@
     opacity: 0;
   }
   .status-pill.running {
-    background: var(--amber-soft);
-    color: var(--amber-bright);
+    background: var(--blue-soft);
+    color: var(--blue-bright);
   }
   .status-pill.running .glow {
     animation: breathe 2.4s ease-in-out infinite;
@@ -296,13 +296,13 @@
     gap: 0.5rem;
     padding: 0.6rem 0.7rem;
     border-radius: var(--radius-sm);
-    background: var(--amber-soft);
-    border: 1px solid rgba(224, 169, 74, 0.3);
+    background: var(--blue-soft);
+    border: 1px solid rgba(47, 140, 255, 0.3);
   }
   .driver-warning-text {
     font-size: 0.78rem;
     line-height: 1.5;
-    color: var(--amber);
+    color: var(--blue);
   }
   .driver-warning-link {
     align-self: flex-start;
@@ -310,12 +310,12 @@
     font-weight: 600;
     letter-spacing: 0.02em;
     text-transform: uppercase;
-    color: var(--amber);
+    color: var(--blue);
     text-decoration: none;
-    border-bottom: 1px solid rgba(224, 169, 74, 0.5);
+    border-bottom: 1px solid rgba(47, 140, 255, 0.5);
   }
   .driver-warning-link:hover {
-    border-bottom-color: var(--amber);
+    border-bottom-color: var(--blue);
   }
   .update-group {
     border-top: 1px solid var(--border);
@@ -326,11 +326,11 @@
     gap: 0.2rem;
     padding: 0.6rem 0.7rem;
     border-radius: var(--radius-sm);
-    background: var(--amber-soft);
-    border: 1px solid rgba(224, 169, 74, 0.25);
+    background: var(--blue-soft);
+    border: 1px solid rgba(47, 140, 255, 0.25);
   }
   .update-badge .label {
-    color: var(--amber);
+    color: var(--blue);
     opacity: 0.9;
   }
   .update-badge .value {

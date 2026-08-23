@@ -9,13 +9,16 @@ rm -f .albiondata-client.*.old
 
 rm -f albiondata-client-amd64-installer.exe
 
+sudo apt-get update && sudo apt-get install -y nsis
+
 go install github.com/tc-hib/go-winres@v0.3.1
 
-export PATH="$PATH:/root/go/bin"
+export PATH="$PATH:$(go env GOPATH)/bin"
 
 go-winres make
 
-env GOOS=windows GOARCH=amd64 go build -ldflags "-s -w -X main.version=$GITHUB_REF_NAME" -o albiondata-client.exe -v -x albiondata-client.go
+(cd frontend && npm ci && npm run build)
+env GOOS=windows GOARCH=amd64 go build -ldflags "-s -w -X main.version=$GITHUB_REF_NAME" -o albiondata-client.exe albiondata-client.go
 
 go-winres patch albiondata-client.exe
 

@@ -7,8 +7,10 @@ import (
 	"os"
 	"regexp"
 	"strings"
+	"time"
 
 	"github.com/ao-data/albiondata-client/client/photon"
+	"github.com/ao-data/albiondata-client/internal/dashboard"
 	"github.com/ao-data/albiondata-client/log"
 	"github.com/google/gopacket"
 	"github.com/google/gopacket/layers"
@@ -36,16 +38,29 @@ func newListener(router *Router) *listener {
 	return l
 }
 
+// startOnline opens a live capture on device. Some enumerated interfaces
+// can't actually be opened for capture - Wintun-based VPN adapters are a
+// common example on Windows, since Npcap's driver binds at the Ethernet/
+// NDIS-filter level and Wintun is a pure Layer-3 tunnel with no such
+// binding. That's expected for a subset of interfaces, not fatal: this
+// logs and abandons only this listener rather than panicking, since a
+// panic here runs on its own goroutine (see createListeners) with
+// nothing to recover it, which would otherwise crash capture on every
+// other interface too.
 func (l *listener) startOnline(device string, port int) {
 	handle, err := pcap.OpenLive(device, 2048, false, pcap.BlockForever)
 	if err != nil {
-		log.Panic(err)
+		log.Errorf("Could not open %s for capture, skipping this interface: %v", device, err)
+		return
 	}
 	l.handle = handle
 
 	err = l.handle.SetBPFFilter(fmt.Sprintf("tcp port %d || udp port %d", port, port))
 	if err != nil {
-		log.Panic(err)
+		log.Errorf("Could not set capture filter on %s, skipping this interface: %v", device, err)
+		l.handle.Close()
+		l.handle = nil
+		return
 	}
 
 	source := gopacket.NewPacketSource(l.handle, l.handle.LinkType())
@@ -134,7 +149,12 @@ func (l *listener) run() {
 
 func (l *listener) stop() {
 	l.quit <- true
-	l.handle.Close()
+	// handle is nil if startOnline bailed out because the device
+	// couldn't be opened for capture (see startOnline) - nothing to
+	// close in that case.
+	if l.handle != nil {
+		l.handle.Close()
+	}
 }
 
 func (l *listener) processPacket(packet gopacket.Packet) {
@@ -155,6 +175,7 @@ func (l *listener) processPacket(packet gopacket.Packet) {
 	l.router.albionstate.AODataServerID, l.router.albionstate.AODataIngestBaseURL = l.router.albionstate.GetServer()
 	log.Tracef("Server ID: %d", l.router.albionstate.AODataServerID)
 	log.Tracef("Using AODataIngestBaseURL: %s", l.router.albionstate.AODataIngestBaseURL)
+	dashboard.SetServer(l.router.albionstate.AODataServerID, l.router.albionstate.AODataIngestBaseURL)
 
 	// Extract the raw Photon payload from the UDP or TCP layer.
 	var payload []byte
@@ -176,8 +197,7 @@ func (l *listener) processPacket(packet gopacket.Packet) {
 }
 
 func (l *listener) onEncrypted() {
-	if l.router.albionstate.WaitingForMarketData {
-		l.router.albionstate.WaitingForMarketData = false
+	if l.router.albionstate.ShouldNotifyMarketDataEncrypted(time.Now()) {
 		log.Info("Market data is encrypted. Please see https://www.albion-online-data.com/client/encryption.html for more information.")
 	}
 }
@@ -270,6 +290,9 @@ func (l *listener) dispatchOperation(op operation, err error, params map[byte]in
 	if err != nil && !ConfigGlobal.DebugIgnoreDecodingErrors {
 		log.Debugf("Error while decoding an event or operation: %v - params: %s", err, formatDebugPhotonParams(params))
 		return
+	}
+	if err == nil {
+		dashboard.RecordActivity()
 	}
 	if op != nil {
 		l.router.newOperation <- op

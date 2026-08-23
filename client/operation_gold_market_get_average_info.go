@@ -28,5 +28,5 @@ func (op operationGoldMarketGetAverageInfoResponse) Process(state *albionState) 
 
 	identifier, _ := uuid.NewV4()
 	log.Infof("Sending gold prices to ingest (Identifier: %s)", identifier)
-	sendMsgToPublicUploaders(upload, lib.NatsGoldPricesIngest, state, identifier.String())
+	sendMsgToPublicUploaders(upload, lib.NatsGoldPricesIngest, state, identifier.String(), len(op.GoldPrices))
 }

@@ -19,6 +19,12 @@ type marketHistoryInfo struct {
 	quality   uint8
 }
 
+// marketDataEncryptionCorrelationWindow bounds how long after a market data
+// request an OnEncrypted packet is assumed to be that request's (now
+// encrypted) response, rather than an unrelated encrypted packet on the
+// same connection.
+const marketDataEncryptionCorrelationWindow = 3 * time.Second
+
 type albionState struct {
 	LocationId                   string
 	LocationString               string
@@ -27,7 +33,8 @@ type albionState struct {
 	GameServerIP                 string
 	AODataServerID               int
 	AODataIngestBaseURL          string
-	WaitingForMarketData         bool
+	LastMarketDataRequestAt      time.Time
+	MarketDataEncryptionNotified bool
 	BanditEventLastTimeSubmitted time.Time
 	FestivitiesLastTimeSubmitted time.Time
 
@@ -107,4 +114,29 @@ func (state albionState) GetServer() (int, string) {
 	}
 
 	return serverID, AODataIngestBaseURL
+}
+
+// RecordMarketDataRequest notes that a market data request was just sent,
+// and re-arms the encryption notification guard so a new request can
+// trigger a new notification even if a prior one already fired.
+func (state *albionState) RecordMarketDataRequest(now time.Time) {
+	state.LastMarketDataRequestAt = now
+	state.MarketDataEncryptionNotified = false
+}
+
+// ShouldNotifyMarketDataEncrypted reports whether an OnEncrypted packet
+// seen at now should be treated as this client's market data response
+// coming back encrypted - i.e. it followed a market data request closely
+// enough to be that request's response, and hasn't already been notified
+// on. Calling this marks the guard so a given request only ever notifies
+// once, even if further encrypted packets arrive within the same window.
+func (state *albionState) ShouldNotifyMarketDataEncrypted(now time.Time) bool {
+	if state.LastMarketDataRequestAt.IsZero() || state.MarketDataEncryptionNotified {
+		return false
+	}
+	if now.Sub(state.LastMarketDataRequestAt) > marketDataEncryptionCorrelationWindow {
+		return false
+	}
+	state.MarketDataEncryptionNotified = true
+	return true
 }

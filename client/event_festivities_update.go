@@ -37,7 +37,7 @@ func (event eventFestivitiesUpdate) Process(state *albionState) {
 
 	identifier, _ := uuid.NewV4()
 	log.Infof("Sending %d festivities to ingest (Identifier: %s)", len(upload.Events), identifier)
-	sendMsgToPublicUploaders(upload, lib.NatsFestivitiesIngest, state, identifier.String())
+	sendMsgToPublicUploaders(upload, lib.NatsFestivitiesIngest, state, identifier.String(), len(upload.Events))
 }
 
 func (event eventFestivitiesUpdate) upload() (lib.FestivitiesUpload, error) {

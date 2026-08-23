@@ -1,5 +1,10 @@
+.PHONY: run frontend fmt validate-fmt build-windows build-linux build-darwin
+
 run:
 	scripts/run.sh
+
+frontend:
+	cd frontend && npm ci && npm run build
 
 fmt:
 	scripts/fmt.sh

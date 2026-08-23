@@ -29,7 +29,7 @@ func (apw *albionProcessWatcher) run() error {
 		return err
 	}
 	apw.devices = physicalInterfaces
-	log.Debugf("Will listen to these devices: %v", apw.devices)
+	log.Infof("Will listen to these devices: %v", apw.devices)
 	go apw.r.run()
 
 	for {

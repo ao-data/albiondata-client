@@ -3,6 +3,7 @@ package client
 import (
 	"encoding/json"
 	"strings"
+	"time"
 
 	"github.com/ao-data/albiondata-client/lib"
 	"github.com/ao-data/albiondata-client/log"
@@ -22,7 +23,7 @@ type operationAuctionGetOffers struct {
 
 func (op operationAuctionGetOffers) Process(state *albionState) {
 	log.Debug("Got AuctionGetOffers operation...")
-	state.WaitingForMarketData = true
+	state.RecordMarketDataRequest(time.Now())
 }
 
 type operationAuctionGetOffersResponse struct {
@@ -31,7 +32,6 @@ type operationAuctionGetOffersResponse struct {
 
 func (op operationAuctionGetOffersResponse) Process(state *albionState) {
 	log.Debug("Got response to AuctionGetOffers operation...")
-	state.WaitingForMarketData = false
 
 	if !state.IsValidLocation() {
 		return
@@ -89,5 +89,5 @@ func (op operationAuctionGetOffersResponse) Process(state *albionState) {
 
 	identifier, _ := uuid.NewV4()
 	log.Infof("Sending %d live market sell orders to ingest (Identifier: %s)", len(orders), identifier)
-	sendMsgToPublicUploaders(upload, lib.NatsMarketOrdersIngest, state, identifier.String())
+	sendMsgToPublicUploaders(upload, lib.NatsMarketOrdersIngest, state, identifier.String(), len(orders))
 }

@@ -56,9 +56,24 @@ func bytePtrToString(p *uint8) string {
 	return string(a[:i])
 }
 
-func physicalAddrToString(physAddr [8]byte) string {
-	buf := make([]byte, 0, len(physAddr)*3-1)
-	for i, b := range physAddr {
+// physicalAddrToString formats the first addrLen bytes of physAddr as a
+// colon-separated hex string. addrLen must be respected rather than
+// always formatting the full fixed-size array: Windows leaves
+// PhysicalAddress zeroed for adapters with no real hardware address (its
+// length is reported separately via PhysicalAddressLength) - such as
+// Wintun, the Layer-3-only virtual adapter PIA's Windows client defaults
+// to for its VPN tunnel. Formatting all 8 zero bytes unconditionally
+// produces "00:00:00:00:00:00:00:00", which collides with the
+// "00:00:00:00:00" Teredo-pseudo-interface entry in
+// macAddrPartsToFilter and gets the tunnel wrongly excluded from
+// capture - exactly the interface carrying all VPN'd game traffic.
+func physicalAddrToString(physAddr [8]byte, addrLen uint32) string {
+	if addrLen == 0 || addrLen > uint32(len(physAddr)) {
+		return ""
+	}
+	addr := physAddr[:addrLen]
+	buf := make([]byte, 0, len(addr)*3-1)
+	for i, b := range addr {
 		if i > 0 {
 			buf = append(buf, ':')
 		}
@@ -93,7 +108,7 @@ func getAllPhysicalInterface() ([]string, error) {
 	devices := strings.Split(strings.ReplaceAll(strings.ToLower(ConfigGlobal.ListenDevices), "-", ":"), ",")
 
 	for _, pa := range aa {
-		mac := physicalAddrToString(pa.PhysicalAddress)
+		mac := physicalAddrToString(pa.PhysicalAddress, pa.PhysicalAddressLength)
 		deviceFound := false
 		if len(devices) > 0 {
 			for _, device := range devices {

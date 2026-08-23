@@ -1,6 +1,10 @@
 .idea/
 _vendor-[0-9]*
+vendor/
 .vscode/
+.claude/
+.stfolder/
+.superpowers/
 *.exe
 *.gz
 *.zip
@@ -12,10 +16,11 @@ config.yaml
 .secrets
 .DS_Store
 act.sh
-albiondata-client*
+/albiondata-client*
 buildall.sh
 run.sh
 *.log
 *.log.*
-
-
+*.syso
+*.tmp
+.worktrees/

@@ -103,6 +103,8 @@ The best way to get in touch with us is on the Albion Online Fansites Discord se
 - Build the project (Go modules will download automatically)
 
 ### Windows Setup
+Requires [Npcap](https://npcap.com/#download) installed in "WinPcap API-compatible Mode" (the installer no longer bundles a capture driver — see licensing notes in `pkg/nsis/albiondata-client.nsi`).
+
 [Windows Setup Guide](https://github.com/ao-data/albiondata-client/wiki/Building-in-Windows)
 
 # License

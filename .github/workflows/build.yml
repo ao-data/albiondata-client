@@ -1,0 +1,70 @@
+# .github/workflows/build.yml
+#
+# Reusable build workflow, shared by test-build.yml (push/PR) and
+# release.yml (release published). Single source of truth for how each
+# OS is built so the three build paths can't drift out of sync with
+# each other the way the darwin job previously did.
+
+on:
+  workflow_call:
+
+jobs:
+  build:
+    name: Build ${{ matrix.os }}
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: linux
+            runner: ubuntu-latest
+            artifacts: |
+              albiondata-client
+              update-linux-amd64.gz
+          - os: windows
+            runner: ubuntu-latest
+            artifacts: |
+              albiondata-client.exe
+              update-windows-amd64.exe.gz
+              albiondata-client-amd64-installer.exe
+          - os: darwin
+            runner: macos-latest
+            artifacts: |
+              albiondata-client
+              update-darwin-amd64.gz
+              albiondata-client-amd64-mac.zip
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Set up Go
+        uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Set up Node
+        uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Build
+        run: make build-${{ matrix.os }}
+
+      # Runs only on the linux leg, which already has libpcap-dev and the
+      # frontend build (both required by the root package's cgo imports
+      # and //go:embed directive) from the build step above - no need to
+      # duplicate that setup in a separate job.
+      - name: Vet
+        if: matrix.os == 'linux'
+        run: go vet ./...
+
+      - name: Test
+        if: matrix.os == 'linux'
+        run: go test ./...
+
+      - uses: actions/upload-artifact@v6
+        with:
+          name: build-${{ matrix.os }}
+          path: ${{ matrix.artifacts }}

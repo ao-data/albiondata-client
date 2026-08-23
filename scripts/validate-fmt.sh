@@ -1,10 +1,9 @@
 #!/usr/bin/env bash
 
 set -e
-echo $CIRCLE_TAG
 
 IFS=$'\n'
-badFiles=($(goimports -l $(go list -f {{.Dir}} ./... | grep -v /vendor/)))
+badFiles=($(goimports -l $(find . -name '*.go' -not -path './vendor/*')))
 unset IFS
 
 if [ ${#badFiles[@]} -eq 0 ]; then

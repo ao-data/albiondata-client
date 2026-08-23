@@ -43,5 +43,5 @@ func (op operationAuctionGetRequestsResponse) Process(state *albionState) {
 
 	identifier, _ := uuid.NewV4()
 	log.Infof("Sending %d live market buy orders to ingest (Identifier: %s)", len(orders), identifier)
-	sendMsgToPublicUploaders(upload, lib.NatsMarketOrdersIngest, state, identifier.String())
+	sendMsgToPublicUploaders(upload, lib.NatsMarketOrdersIngest, state, identifier.String(), len(orders))
 }

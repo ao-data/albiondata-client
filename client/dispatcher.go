@@ -6,6 +6,7 @@ import (
 
 	"strings"
 
+	"github.com/ao-data/albiondata-client/internal/dashboard"
 	"github.com/ao-data/albiondata-client/lib"
 	"github.com/ao-data/albiondata-client/log"
 )
@@ -52,7 +53,9 @@ func createUploaders(targets []string) []uploader {
 	return uploaders
 }
 
-func sendMsgToPublicUploaders(upload interface{}, topic string, state *albionState, identifier string) {
+func sendMsgToPublicUploaders(upload interface{}, topic string, state *albionState, identifier string, recordCount int) {
+	dashboard.IncrementCounterBy(topic, int64(recordCount))
+
 	data, err := json.Marshal(upload)
 	if err != nil {
 		log.Errorf("Error while marshalling payload for %v: %v", err, topic)

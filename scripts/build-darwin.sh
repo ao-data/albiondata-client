@@ -2,46 +2,32 @@
 
 set -eo pipefail
 
-apt-get update && apt-get install -y libpcap-dev zip
+rm -f albiondata-client
+rm -f albiondata-client.gz
+rm -f update-darwin-amd64.gz
+rm -f albiondata-client-amd64-mac.zip
 
-export OSXCROSS_NO_INCLUDE_PATH_WARNINGS=1
-export MACOSX_DEPLOYMENT_TARGET=10.6
-export CC=/usr/osxcross/bin/o64-clang
-export CXX=/usr/osxcross/bin/o64-clang++
-export GOOS=darwin
-export GOARCH=amd64 CGO_ENABLED=1
-go build -ldflags "-s -w -X main.version=$GITHUB_REF_NAME" albiondata-client.go
+(cd frontend && npm ci && npm run build)
 
+# Native macOS build. GitHub's macos-latest runners are arm64 hardware, so
+# amd64 output requires explicit CC/CGO_LDFLAGS arch flags. CGO stays on
+# since gopacket links against libpcap.
+export CGO_ENABLED=1
+export GOARCH=amd64
+export CC="clang -arch x86_64"
+export CGO_LDFLAGS="-arch x86_64"
+go build -ldflags "-s -w -X main.version=$GITHUB_REF_NAME" -o albiondata-client albiondata-client.go
 
 gzip -k9 albiondata-client
 mv albiondata-client.gz update-darwin-amd64.gz
 
-
-# Creates a zipped folder with a run.command file that runs the client under sudo
+# Zipped folder with a run.command file that runs the client under sudo
 TEMP="albiondata-client"
 ZIPNAME="albiondata-client-amd64-mac.zip"
 rm -rfv ./scripts/$TEMP
 rm -rfv ./$ZIPNAME
-rm -rfv ./scripts/update-darwin-amd64.zip
 mkdir -v ./scripts/$TEMP
 cp -v albiondata-client ./scripts/$TEMP/albiondata-client-executable
-cd scripts
-cp -v run.command ./$TEMP/run.command
-chown -Rv ${USER}:${USER} ./$TEMP
-chmod -v 777 ./$TEMP/*
-zip -v ../$ZIPNAME -r ./"$TEMP"
-
-# In theory the following works to create an app but there was a permissions issue when opening on the mac
-# APP_NAME="Albion Data Client"
-# TEMP="$APP_NAME".app
-# ZIPNAME="albiondata-client-amd64-mac.zip"
-
-# rm -rfv ./scripts/"$TEMP"
-# rm -rfv ./scripts/"$ZIPNAME"
-# mkdir -pv ./scripts/"$TEMP"/Contents/MacOS
-# cp -v albiondata-client-darwin-10.6-amd64 ./scripts/"$TEMP"/Contents/MacOS/"$APP_NAME"
-# chown -Rv ${USER}:${USER} ./scripts/"$TEMP"
-# chmod -v 777 ./scripts/"$TEMP"/*
-
-# cd scripts
-# zip -v ../$ZIPNAME -r ./"$TEMP"
+cp -v ./scripts/run.command ./scripts/$TEMP/run.command
+chmod -v 777 ./scripts/$TEMP/*
+(cd scripts && zip -v ../$ZIPNAME -r ./"$TEMP")

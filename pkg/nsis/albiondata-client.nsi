@@ -96,6 +96,25 @@ Function .onInit
 
   !insertmacro MUI_LANGDLL_DISPLAY
 
+  ; Npcap cannot be bundled with this installer: redistribution requires a
+  ; paid OEM license (npcap.com/oem), unlike the old WinPCAP driver this
+  ; installer used to bundle directly. The Nmap Project's own guidance for
+  ; free/open-source software is to have users download and install it
+  ; themselves instead - it's free for that. Detect it and point users at
+  ; the official download rather than silently failing to capture later.
+  ClearErrors
+  ReadRegDWORD $0 HKLM "SOFTWARE\Npcap" "AdminOnly"
+  IfErrors 0 npcap_found
+  ClearErrors
+  ReadRegDWORD $0 HKLM "SOFTWARE\WOW6432Node\Npcap" "AdminOnly"
+  IfErrors 0 npcap_found
+
+  MessageBox MB_YESNO|MB_ICONEXCLAMATION "Npcap was not detected on this system.$\r$\n$\r$\n${PACKAGE_NAME} requires Npcap to capture network traffic. It's a free download, but licensing terms don't allow it to be bundled with this installer, so it must be installed separately.$\r$\n$\r$\nOpen the Npcap download page now? (During its setup, check $\"Install Npcap in WinPcap API-compatible Mode$\".)$\r$\n$\r$\nYou can continue installing ${PACKAGE_NAME} either way, but network capture will not work until Npcap is installed." IDNO npcap_skip
+  ExecShell "open" "https://npcap.com/#download"
+npcap_skip:
+
+npcap_found:
+
 FunctionEnd
 
 
@@ -111,10 +130,6 @@ Section $(TEXT_SecBase) SecBase
 
   ; Main executable
   File "${TOP_SRCDIR}\${PACKAGE_EXE}"
-
-  ; WinPCAP driver
-  File "${TOP_SRCDIR}\thirdparty\WinPcap_4_1_3.exe"
-  PUSH "WinPcap_4_1_3.exe"
 
   File "${TOP_SRCDIR}\LICENSE"
   Push "LICENSE"
@@ -152,12 +167,6 @@ Section $(TEXT_SecBase) SecBase
 ; Create Task to run the Client as Admin on Logon
   Exec 'c:\Windows\System32\schtasks.exe /Create /F /SC ONLOGON /RL HIGHEST /TN "Albion Data Client" /TR "\"$INSTDIR\albiondata-client.exe\" -minimize"'
 
-SectionEnd
-
-Section $(TEXT_SecWinPcap) SecWinPcap
-  SetOutPath "$INSTDIR"
-  File "${TOP_SRCDIR}\thirdparty\WinPcap_4_1_3.exe"
-  ExecWait '"$INSTDIR\WinPcap_4_1_3.exe"'
 SectionEnd
 
 
@@ -207,9 +216,6 @@ FunctionEnd
 LangString TEXT_SecBase ${LANG_ENGLISH} "Core files"
 LangString DESC_SecBase ${LANG_ENGLISH} "The core files required to run ${PACKAGE_NAME}."
 
-LangString TEXT_SecWinPcap ${LANG_ENGLISH} "WinPCAP"
-LangString DESC_SecWinPcap ${LANG_ENGLISH} "WinPCAP Driver"
-
 
 ;--------------------------------
 ;Uninstaller Section
@@ -219,7 +225,7 @@ Section "Uninstall"
   ; Main executable
   Delete "$INSTDIR\${PACKAGE_EXE}"
 
-  ; WinPCAP driver
+  ; Leftover from installers before this one stopped bundling WinPCAP
   Delete "$INSTDIR\WinPcap_4_1_3.exe"
   Delete "$INSTDIR\LICENSE.txt"
   Delete "$INSTDIR\uninstall.exe"

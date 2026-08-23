@@ -122,5 +122,5 @@ func (op operationAuctionGetItemAverageStatsResponse) Process(state *albionState
 
 	identifier, _ := uuid.NewV4()
 	log.Infof("Sending %d market history item average stats to ingest for albionID %d (Identifier: %s)", len(histories), mhInfo.albionId, identifier)
-	sendMsgToPublicUploaders(upload, lib.NatsMarketHistoriesIngest, state, identifier.String())
+	sendMsgToPublicUploaders(upload, lib.NatsMarketHistoriesIngest, state, identifier.String(), len(histories))
 }

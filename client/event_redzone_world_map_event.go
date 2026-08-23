@@ -39,6 +39,6 @@ func (event eventRedZoneWorldMapEvent) Process(state *albionState) {
 			Phase:         event.Phase,
 		}
 		log.Infof("Sending bandit event to ingest (Identifier: %s)", identifier)
-		sendMsgToPublicUploaders(upload, lib.NatsBanditEvent, state, identifier.String())
+		sendMsgToPublicUploaders(upload, lib.NatsBanditEvent, state, identifier.String(), 1)
 	}
 }

@@ -10,7 +10,8 @@ import (
 // interfaces to pick up any that appeared after startup - e.g. a VPN's
 // virtual adapter created when the VPN is turned on after this process
 // has already started, which otherwise would never be listened on until
-// the app is restarted.
+// the app is restarted - and to stop listening on any that disappeared,
+// e.g. that same adapter when the VPN is turned back off.
 const rescanInterval = 10 * time.Second
 
 type albionProcessWatcher struct {
@@ -49,7 +50,7 @@ func (apw *albionProcessWatcher) run() error {
 			if len(apw.listeners) == 0 {
 				apw.createListeners()
 			} else if time.Since(lastRescan) >= rescanInterval {
-				apw.rescanForNewDevices()
+				apw.rescan()
 				lastRescan = time.Now()
 			}
 			time.Sleep(time.Second)
@@ -71,41 +72,91 @@ func (apw *albionProcessWatcher) closeWatcher() {
 	apw.r.quit <- true
 }
 
-// rescanForNewDevices re-enumerates physical network interfaces and
-// starts a listener on any that weren't already known, without
-// disturbing existing listeners - see rescanInterval's doc comment.
-func (apw *albionProcessWatcher) rescanForNewDevices() {
-	current, err := getAllPhysicalInterface()
-	if err != nil {
-		log.Errorf("Rescan for new network interfaces failed: %v", err)
-		return
-	}
-
-	known := make(map[string]bool, len(apw.devices))
-	for _, d := range apw.devices {
-		known[d] = true
-	}
-
-	var newDevices []string
+// diffDevices compares the previously-known device list against a fresh
+// enumeration, pulled out of rescan so it's unit-testable without real
+// network interfaces (same split as pcapdriver's Check/decide).
+func diffDevices(known, current []string) (newDevices, vanishedDevices []string) {
+	currentSet := make(map[string]bool, len(current))
 	for _, d := range current {
-		if !known[d] {
+		currentSet[d] = true
+	}
+	knownSet := make(map[string]bool, len(known))
+	for _, d := range known {
+		knownSet[d] = true
+	}
+
+	for _, d := range current {
+		if !knownSet[d] {
 			newDevices = append(newDevices, d)
 		}
 	}
-	if len(newDevices) == 0 {
+	for _, d := range known {
+		if !currentSet[d] {
+			vanishedDevices = append(vanishedDevices, d)
+		}
+	}
+	return newDevices, vanishedDevices
+}
+
+// rescan re-enumerates physical network interfaces and applies the
+// result - see rescanInterval's doc comment.
+func (apw *albionProcessWatcher) rescan() {
+	current, err := getAllPhysicalInterface()
+	if err != nil {
+		log.Errorf("Rescan for network interfaces failed: %v", err)
 		return
 	}
+	apw.applyDeviceDiff(current)
+}
 
-	log.Infof("Found new network interfaces, starting capture on them: %v", newDevices)
-	apw.devices = append(apw.devices, newDevices...)
+// applyDeviceDiff starts a listener on any device in current that wasn't
+// already known, and stops + drops the listener(s) for any known device
+// that's no longer in current. Split out from rescan so it's testable
+// without a real getAllPhysicalInterface() call.
+func (apw *albionProcessWatcher) applyDeviceDiff(current []string) {
+	newDevices, vanishedDevices := diffDevices(apw.devices, current)
 
-	for port := range apw.listeners {
-		for _, device := range newDevices {
-			l := newListener(apw.r)
-			go l.startOnline(device, port)
+	if len(newDevices) > 0 {
+		log.Infof("Found new network interfaces, starting capture on them: %v", newDevices)
+		apw.devices = append(apw.devices, newDevices...)
 
-			apw.listeners[port] = append(apw.listeners[port], l)
+		for port := range apw.listeners {
+			for _, device := range newDevices {
+				l := newListener(apw.r)
+				l.device = device
+				go l.startOnline(device, port)
+
+				apw.listeners[port] = append(apw.listeners[port], l)
+			}
 		}
+	}
+
+	if len(vanishedDevices) > 0 {
+		log.Infof("Network interfaces disappeared, stopping capture on them: %v", vanishedDevices)
+		vanishedSet := make(map[string]bool, len(vanishedDevices))
+		for _, d := range vanishedDevices {
+			vanishedSet[d] = true
+		}
+
+		for port, listeners := range apw.listeners {
+			kept := listeners[:0]
+			for _, l := range listeners {
+				if vanishedSet[l.device] {
+					l.stop()
+				} else {
+					kept = append(kept, l)
+				}
+			}
+			apw.listeners[port] = kept
+		}
+
+		remaining := apw.devices[:0]
+		for _, d := range apw.devices {
+			if !vanishedSet[d] {
+				remaining = append(remaining, d)
+			}
+		}
+		apw.devices = remaining
 	}
 }
 
@@ -115,6 +166,7 @@ func (apw *albionProcessWatcher) createListeners() {
 	for _, port := range filtered {
 		for _, device := range apw.devices {
 			l := newListener(apw.r)
+			l.device = device
 			go l.startOnline(device, port)
 
 			apw.listeners[port] = append(apw.listeners[port], l)

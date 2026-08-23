@@ -22,9 +22,15 @@ type listener struct {
 	sourcePackets chan gopacket.Packet
 	rawCommands   chan photon.RawPacket
 	displayName   string
-	parser        *photon.PhotonParser
-	quit          chan bool
-	router        *Router
+	// device is the network interface name this listener was started on
+	// (for online listeners only) - set by the caller before startOnline
+	// runs, so albionProcessWatcher.rescan can match a listener to a
+	// device that's disappeared without a race against the goroutine
+	// startOnline runs in.
+	device string
+	parser *photon.PhotonParser
+	quit   chan bool
+	router *Router
 }
 
 func newListener(router *Router) *listener {

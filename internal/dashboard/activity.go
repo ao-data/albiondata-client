@@ -16,7 +16,7 @@ var (
 	activityMu        sync.Mutex
 	lastActivity      time.Time
 	activityOnce      sync.Once
-	captureStaleAfter = 30 * time.Second
+	captureStaleAfter = 10 * time.Second
 )
 
 // RecordActivity records that a decoded game message was just received,
@@ -75,6 +75,6 @@ func setCaptureStaleAfterForTest(d time.Duration) {
 func resetActivityForTest() {
 	activityMu.Lock()
 	lastActivity = time.Time{}
-	captureStaleAfter = 30 * time.Second
+	captureStaleAfter = 10 * time.Second
 	activityMu.Unlock()
 }

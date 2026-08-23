@@ -3,24 +3,69 @@
   import { Browser, Events } from '@wailsio/runtime';
   import { DashboardService } from '../../bindings/github.com/ao-data/albiondata-client/internal/dashboard/index.js';
 
-  const UUID_RE = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/gi;
+  // Only a UUID immediately after "Identifier: " is a real data
+  // identifier (see the various "...to ingest (Identifier: %s)" log
+  // sites in client/*.go) - a bare UUID-shaped string elsewhere in a log
+  // line is just as likely to be something unrelated, like a Windows
+  // network device GUID (e.g. "Will listen to these devices: ...").
+  const IDENTIFIER_RE = /Identifier: ([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/gi;
+  const URL_RE = /https?:\/\/\S+/gi;
 
   function identifierUrl(id) {
     return `https://www.albion-online-data.com/identifier?identifier=${id}`;
   }
 
-  // Splits a log message into plain-text and identifier segments so
-  // identifiers can be rendered as links instead of interpolating raw
+  // Finds identifier and URL matches in a log message, each as a
+  // {start, end, type, value} span over the original string. Only the
+  // UUID itself (not the "Identifier: " prefix) is included in an
+  // identifier span, so that prefix stays plain text.
+  function findLinkSpans(message) {
+    const matches = [];
+
+    for (const m of message.matchAll(IDENTIFIER_RE)) {
+      const start = m.index + m[0].indexOf(m[1]);
+      matches.push({ start, end: start + m[1].length, type: 'identifier', value: m[1] });
+    }
+    for (const m of message.matchAll(URL_RE)) {
+      // Trim trailing punctuation that's almost certainly sentence/log
+      // formatting rather than part of the URL (e.g. the closing paren
+      // in "see https://example.com/foo for more").
+      let value = m[0];
+      let end = m.index + value.length;
+      while (value.length && /[).,;:!?]/.test(value[value.length - 1])) {
+        value = value.slice(0, -1);
+        end -= 1;
+      }
+      matches.push({ start: m.index, end, type: 'url', value });
+    }
+
+    matches.sort((a, b) => a.start - b.start);
+
+    // Identifiers and URLs have disjoint prefixes ("Identifier: " vs
+    // "http(s)://"), so overlap shouldn't happen in practice, but stay
+    // defensive rather than render a mangled/duplicated span.
+    const kept = [];
+    let cursor = 0;
+    for (const m of matches) {
+      if (m.start < cursor) continue;
+      kept.push(m);
+      cursor = m.end;
+    }
+    return kept;
+  }
+
+  // Splits a log message into plain-text, identifier, and URL segments
+  // so links can be rendered as <a> instead of interpolating raw
   // (untrusted) log text as HTML.
   function splitMessage(message) {
     const parts = [];
     let lastIndex = 0;
-    for (const match of message.matchAll(UUID_RE)) {
-      if (match.index > lastIndex) {
-        parts.push({ type: 'text', value: message.slice(lastIndex, match.index) });
+    for (const span of findLinkSpans(message)) {
+      if (span.start > lastIndex) {
+        parts.push({ type: 'text', value: message.slice(lastIndex, span.start) });
       }
-      parts.push({ type: 'identifier', value: match[0] });
-      lastIndex = match.index + match[0].length;
+      parts.push(span);
+      lastIndex = span.end;
     }
     if (lastIndex < message.length) {
       parts.push({ type: 'text', value: message.slice(lastIndex) });
@@ -31,6 +76,11 @@
   function openIdentifier(e, id) {
     e.preventDefault();
     Browser.OpenURL(identifierUrl(id));
+  }
+
+  function openLink(e, url) {
+    e.preventDefault();
+    Browser.OpenURL(url);
   }
 
   let copiedId = $state(null);
@@ -97,6 +147,12 @@
               title="Copy identifier link"
             >{copiedId === part.value ? 'copied' : 'copy'}</button
             >
+          {:else if part.type === 'url'}
+            <a
+              class="log-link"
+              href={part.value}
+              onclick={(e) => openLink(e, part.value)}
+            >{part.value}</a>
           {:else}{part.value}{/if}
         {/each}
       </span>
@@ -134,12 +190,14 @@
   .message {
     color: var(--text);
   }
-  .identifier-link {
+  .identifier-link,
+  .log-link {
     color: var(--amber-bright);
     text-decoration: none;
     border-bottom: 1px solid rgba(242, 200, 119, 0.35);
   }
-  .identifier-link:hover {
+  .identifier-link:hover,
+  .log-link:hover {
     border-bottom-color: var(--amber-bright);
   }
   .copy-btn {

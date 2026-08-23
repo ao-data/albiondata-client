@@ -53,10 +53,18 @@ Svelte 5 (runes), Vite. Structure:
   underneath.
 - `lib/CountersPanel.svelte` - the counters, as a vertical label/value
   list embedded in the sidebar (not a standalone card grid).
-- `lib/LogTail.svelte` - the scrolling log view. UUID-shaped identifiers
-  in log lines render as links to
+- `lib/LogTail.svelte` - the scrolling log view. Two kinds of spans in
+  log lines render as clickable links (opened via `Browser.OpenURL`,
+  never in-webview navigation): a UUID immediately after `"Identifier:
+  "` (matching the various `"...(Identifier: %s)"` log sites in
+  `client/*.go`) links to
   `albion-online-data.com/identifier?identifier=<uuid>` with a copy
-  button.
+  button; any bare `http(s)://` URL elsewhere in the message is
+  linkified plainly. The identifier match requires that literal prefix
+  deliberately - a bare UUID-shaped string anywhere else in a log line
+  (e.g. a Windows network device GUID in "Will listen to these
+  devices: ...") is not a data identifier and must not be linked as
+  one.
 - `lib/Footer.svelte` - external links (project site, Discord),
   version display. Opened via `Browser.OpenURL`, not in-webview
   navigation - these should open in the user's real browser.

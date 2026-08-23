@@ -17,6 +17,7 @@ config.yaml
 .DS_Store
 act.sh
 /albiondata-client*
+/.albiondata-client*
 buildall.sh
 run.sh
 *.log

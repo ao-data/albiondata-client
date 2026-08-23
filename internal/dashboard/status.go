@@ -15,6 +15,12 @@ type Status struct {
 	CustomPublicIngest bool
 	DriverWarning      string
 	DriverHelpURL      string
+	// EncryptionStatus is "" (unknown - nothing observed yet this
+	// session), "encrypted" (a market data response came back
+	// encrypted), or "clear" (a market data response came back and
+	// decoded normally). See client/albion_state.go's
+	// ShouldNotifyMarketDataEncrypted for how "encrypted" is decided.
+	EncryptionStatus string
 }
 
 var (
@@ -144,6 +150,33 @@ func SetDriverWarning(message, helpURL string) {
 	next := status
 	next.DriverWarning = message
 	next.DriverHelpURL = helpURL
+	changed := next != status
+	if changed {
+		status = next
+	}
+	emit := statusEmit
+	statusMu.Unlock()
+
+	if changed && emit != nil {
+		emit(next)
+	}
+}
+
+// EncryptionStatus values for SetEncryptionStatus.
+const (
+	EncryptionUnknown  = ""
+	EncryptionDetected = "encrypted"
+	EncryptionClear    = "clear"
+)
+
+// SetEncryptionStatus records whether market data has most recently come
+// back encrypted, come back clear, or is unknown (EncryptionUnknown,
+// the zero value - nothing observed yet, or reset because capture went
+// idle and any prior observation is stale).
+func SetEncryptionStatus(encryptionStatus string) {
+	statusMu.Lock()
+	next := status
+	next.EncryptionStatus = encryptionStatus
 	changed := next != status
 	if changed {
 		status = next

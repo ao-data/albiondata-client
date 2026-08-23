@@ -124,6 +124,13 @@ export class Status {
              */
             this["DriverHelpURL"] = "";
         }
+        if (!("EncryptionStatus" in $$source)) {
+            /**
+             * @member
+             * @type {string}
+             */
+            this["EncryptionStatus"] = "";
+        }
 
         Object.assign(this, $$source);
     }

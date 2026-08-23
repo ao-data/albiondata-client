@@ -82,6 +82,7 @@ func TestRecordActivity_GoingStaleClearsCountersAndServer(t *testing.T) {
 
 	IncrementCounter("marketorders.ingest")
 	SetServer(1, "https://example.invalid")
+	SetEncryptionStatus(EncryptionClear)
 
 	RecordActivity()
 	time.Sleep(100 * time.Millisecond)
@@ -96,6 +97,9 @@ func TestRecordActivity_GoingStaleClearsCountersAndServer(t *testing.T) {
 	if got.ServerID != 0 || got.IngestBaseURL != "" {
 		t.Fatalf("expected server cleared after going stale, got ServerID=%d IngestBaseURL=%q", got.ServerID, got.IngestBaseURL)
 	}
+	if got.EncryptionStatus != EncryptionUnknown {
+		t.Fatalf("expected encryption status cleared after going stale, got %q", got.EncryptionStatus)
+	}
 }
 
 func TestRecordActivity_StillRunningDoesNotClearCountersOrServer(t *testing.T) {
@@ -107,6 +111,7 @@ func TestRecordActivity_StillRunningDoesNotClearCountersOrServer(t *testing.T) {
 
 	IncrementCounter("marketorders.ingest")
 	SetServer(1, "https://example.invalid")
+	SetEncryptionStatus(EncryptionClear)
 
 	RecordActivity()
 
@@ -116,5 +121,8 @@ func TestRecordActivity_StillRunningDoesNotClearCountersOrServer(t *testing.T) {
 	got := GetStatus()
 	if got.ServerID != 1 {
 		t.Fatalf("expected server to survive while still running, got ServerID=%d", got.ServerID)
+	}
+	if got.EncryptionStatus != EncryptionClear {
+		t.Fatalf("expected encryption status to survive while still running, got %q", got.EncryptionStatus)
 	}
 }

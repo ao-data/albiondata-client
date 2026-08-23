@@ -57,6 +57,27 @@ func TestSetCaptureError_EmitsOnChange(t *testing.T) {
 	}
 }
 
+func TestSetEncryptionStatus_EmitsOnChange(t *testing.T) {
+	resetStatusForTest()
+
+	var got []Status
+	OnStatusChange(func(s Status) { got = append(got, s) })
+
+	SetEncryptionStatus(EncryptionDetected)
+	SetEncryptionStatus(EncryptionDetected) // no change, no emit
+	SetEncryptionStatus(EncryptionClear)
+	SetEncryptionStatus(EncryptionUnknown)
+
+	if len(got) != 3 {
+		t.Fatalf("expected 3 emits, got %d: %+v", len(got), got)
+	}
+	if got[0].EncryptionStatus != EncryptionDetected ||
+		got[1].EncryptionStatus != EncryptionClear ||
+		got[2].EncryptionStatus != EncryptionUnknown {
+		t.Fatalf("unexpected emitted statuses: %+v", got)
+	}
+}
+
 func TestGetStatus_ReflectsAllSetters(t *testing.T) {
 	resetStatusForTest()
 

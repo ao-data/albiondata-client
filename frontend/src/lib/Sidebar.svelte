@@ -51,6 +51,7 @@
     CustomPublicIngest: false,
     DriverWarning: '',
     DriverHelpURL: '',
+    EncryptionStatus: '',
   });
 
   DashboardService.GetStatus().then((s) => (status = s));
@@ -67,6 +68,13 @@
   );
   let badgeLabel = $derived(
     status.CaptureError ? 'Error' : status.CaptureRunning ? 'Capturing' : 'Ready'
+  );
+  let encryptionLabel = $derived(
+    status.EncryptionStatus === 'encrypted'
+      ? 'Encrypted'
+      : status.EncryptionStatus === 'clear'
+        ? 'Not Encrypted'
+        : 'Encrypted?'
   );
 
   function openDriverHelp(e) {
@@ -89,14 +97,25 @@
   </div>
 
   <div class="group">
-    <span
-      class="status-pill"
-      class:running={status.CaptureRunning && !status.CaptureError}
-      class:error={status.CaptureError}
-    >
-      <span class="lantern"><span class="glow"></span></span>
-      {badgeLabel}
-    </span>
+    <div class="pill-row">
+      <span
+        class="status-pill"
+        class:running={status.CaptureRunning && !status.CaptureError}
+        class:error={status.CaptureError}
+      >
+        <span class="lantern"><span class="glow"></span></span>
+        {badgeLabel}
+      </span>
+
+      <span
+        class="status-pill"
+        class:encrypted={status.EncryptionStatus === 'encrypted'}
+        class:clear={status.EncryptionStatus === 'clear'}
+      >
+        <span class="lantern"><span class="glow"></span></span>
+        {encryptionLabel}
+      </span>
+    </div>
 
     <div class="field">
       <span class="label">Server</span>
@@ -205,6 +224,12 @@
     font-size: 0.85rem;
     color: var(--text);
   }
+  .pill-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+  }
   .status-pill {
     display: inline-flex;
     align-items: center;
@@ -244,9 +269,14 @@
   .status-pill.running .glow {
     animation: breathe 2.4s ease-in-out infinite;
   }
-  .status-pill.error {
+  .status-pill.error,
+  .status-pill.encrypted {
     background: var(--ember-soft);
     color: var(--ember);
+  }
+  .status-pill.clear {
+    background: var(--moss-soft);
+    color: var(--moss);
   }
   @keyframes breathe {
     0%, 100% { opacity: 0; transform: scale(0.6); }

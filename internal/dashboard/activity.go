@@ -48,11 +48,12 @@ func staleCheckLoop() {
 			wasRunning := GetStatus().CaptureRunning
 			SetCaptureRunning(false)
 			if wasRunning {
-				// Capture just went idle - counts and the detected server
-				// from that session are no longer meaningful for whatever
-				// comes next.
+				// Capture just went idle - counts, the detected server, and
+				// the last observed encryption status are no longer
+				// meaningful for whatever comes next.
 				ResetCounters()
 				SetServer(0, "")
+				SetEncryptionStatus(EncryptionUnknown)
 			}
 		}
 	}

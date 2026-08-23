@@ -204,6 +204,7 @@ func (l *listener) processPacket(packet gopacket.Packet) {
 
 func (l *listener) onEncrypted() {
 	if l.router.albionstate.ShouldNotifyMarketDataEncrypted(time.Now()) {
+		dashboard.SetEncryptionStatus(dashboard.EncryptionDetected)
 		log.Info("Market data is encrypted. Please see https://www.albion-online-data.com/client/encryption.html for more information.")
 	}
 }

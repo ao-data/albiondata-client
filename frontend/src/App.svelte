@@ -38,6 +38,8 @@
     --ready-soft: rgba(156, 146, 132, 0.12);
     --ember: #c1543f;
     --ember-soft: rgba(193, 84, 63, 0.16);
+    --moss: #6d9c5f;
+    --moss-soft: rgba(109, 156, 95, 0.16);
 
     --radius: 7px;
     --radius-sm: 5px;

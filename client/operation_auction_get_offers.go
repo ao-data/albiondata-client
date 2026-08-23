@@ -5,6 +5,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/ao-data/albiondata-client/internal/dashboard"
 	"github.com/ao-data/albiondata-client/lib"
 	"github.com/ao-data/albiondata-client/log"
 	uuid "github.com/nu7hatch/gouuid"
@@ -82,6 +83,10 @@ func (op operationAuctionGetOffersResponse) Process(state *albionState) {
 	if len(orders) < 1 {
 		return
 	}
+
+	// A response that decoded into real orders is live proof market data
+	// isn't encrypted right now.
+	dashboard.SetEncryptionStatus(dashboard.EncryptionClear)
 
 	upload := lib.MarketUpload{
 		Orders: orders,

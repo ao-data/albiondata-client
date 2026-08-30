@@ -1,7 +1,6 @@
 package client
 
 import (
-	"bytes"
 	"crypto/rand"
 	"crypto/sha256"
 	"encoding/hex"
@@ -117,18 +116,7 @@ func (u *httpUploaderPow) uploadWithPow(pow Pow, solution string, natsmsg []byte
 func randomHex(n int) string {
     b := make([]byte, n)
     rand.Read(b)
-    dst := make([]byte, n*2)
-    hex.Encode(dst, b)
-    return string(dst)
-}
-
-// Converts a string to bits e.g.: 0110011...
-func toBinaryBytes(s string) string {
-	var buffer bytes.Buffer
-	for i := 0; i < len(s); i++ {
-		fmt.Fprintf(&buffer, "%08b", s[i])
-	}
-	return fmt.Sprintf("%s", buffer.Bytes())
+    return hex.EncodeToString(b)
 }
 
 // Solves a pow looping through possible solutions
@@ -137,35 +125,28 @@ func toBinaryBytes(s string) string {
 func solvePow(pow Pow) string {
 	wantedLen := len(pow.Wanted)
 	var hexBuf [64]byte
-	var binBuf [512]byte
 
-	prefix := "aod^"
-	sep := "^"
 	for {
 		randhex := randomHex(16)
-		challenge := prefix + randhex + sep + pow.Key
-		hash := sha256.Sum256([]byte(challenge))
+		hash := sha256.Sum256([]byte("aod^" + randhex + "^" + pow.Key))
 		hex.Encode(hexBuf[:], hash[:])
 
 		idx := 0
-		for i := 0; i < 64; i++ {
-			b := hexBuf[i]
-			for j := 7; j >= 0; j-- {
-				if (b>>j)&1 == 1 {
-					binBuf[idx] = '1'
-				} else {
-					binBuf[idx] = '0'
-				}
-				idx++
-				if idx >= wantedLen {
+		mismatch := false
+		for i := 0; i < 64 && idx < wantedLen; i++ {
+			for j := 7; j >= 0 && idx < wantedLen; j-- {
+				if (hexBuf[i]>>j)&1 != pow.Wanted[idx] - '0' {
+					mismatch = true
 					break
 				}
+				idx++
 			}
-			if idx >= wantedLen {
+			if mismatch {
 				break
 			}
 		}
-		if string(binBuf[:wantedLen]) == pow.Wanted {
+
+		if !mismatch {
 			return randhex
 		}
 	}

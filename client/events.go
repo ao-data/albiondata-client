@@ -480,6 +480,7 @@ const (
 	evSimpleFeedback
 	evSmartClusterQueueSkipClusterError
 	evXignCodeEvent
+	evAceTokenEvent
 	evBatchUseItemStart
 	evBatchUseItemEnd
 	evRedZonePlayerNotification
@@ -576,6 +577,8 @@ const (
 	evInteractWithTrackCancel
 	evInteractWithTrackFinished
 	evNewDynamicCompound
+	evNewDynamicTileComposition
+	evDestroyDynamicTileComposition
 	evLegendaryItemDestroyed
 	evAttunementInfo
 	evTerritoryClaimRaidedRawEnergyCrystalResult
@@ -691,6 +694,27 @@ const (
 	evRetrieveCarriableObjectFinished
 	evLosingCarriableObjectStart
 	evLosingCarriableObjectFinished
+	evDragonIncursionClusterState
 	evNotifyPlatformAccountConfirmed
+	evDragonAreaMainQuestStateUpdateBase
+	evDragonAreaPlayerJoinedInfo
+	evDragonAreaMainQuestStateUpdate
+	evDebugTriggerDragonAreaShutdownStart
+	evBleedOut
+	evNewDragonAreaEntrance
+	evNewDragonAreaExit
+	evDragonAreaExitStatusUpdate
+	evUpdateDragonEnergy
+	evDragonAreaTeleporterKeyUpdate
+	evUsingDragonAreaEntranceStateUpdate
+	evDragonAreaEntranceBindingStateUpdate
 	evFactionTraderZoneBuffFailure
+	evSmartClusterQueueContingentEntered
+	evNewCorpseObject
+	evClusterSyncedStringValueUpdate
+	evClusterSyncedBoolValueUpdate
+	evClusterSyncedIntValueUpdate
+	evClusterSyncedStringValuesSnapshot
+	evClusterSyncedBoolValuesSnapshot
+	evClusterSyncedIntValuesSnapshot
 )

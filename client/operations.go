@@ -355,12 +355,15 @@ const (
 	opSteamFinishMicrotransaction
 	opRequestXboxPurchaseIntent
 	opCloseXboxPurchaseIntent
+	opRequestPlayStationPurchaseIntent
+	opClosePlayStationPurchaseIntent
 	opSteamIdHasActiveAccount
 	opCheckEmailAccountState
 	opLinkAccountToSteamId
 	opEpicIdHasActiveAccount
 	opLinkAccountToEpicId
 	opXboxIdHasActiveAccount
+	opPlayStationIdHasActiveAccount
 	opInAppConfirmPaymentGooglePlay
 	opInAppConfirmPaymentAppleAppStore
 	opInAppPurchaseRequest
@@ -391,6 +394,7 @@ const (
 	opUseConsumableFromInventory
 	opClaimPersonalSeasonReward
 	opXignCodeMessageToServer
+	opAceMessage
 	opBattlEyeMessageToServer
 	opSetNextTutorialState
 	opAddPlayerToMuteList
@@ -547,10 +551,11 @@ const (
 	opArmoryActivityUsageStatistics
 	opHellDungeonUseStaticEntrance
 	opTravelIslandShowroom
-	opGetXuids
+	opGetPlatformIds
 	opXboxServiceTicket
 	opEvaluatePlatformPerks
 	opLinkAccountToXbox
+	opLinkAccountToPlayStationId
 	opTravelFactionWarfarePortal
 	opRequestRedZoneEventStandings
 	opGetZergDebuffInfo
@@ -561,4 +566,8 @@ const (
 	opGetPartyMemberCluster
 	opSetPartyNavigation
 	opEndPartyNavigation
+	opUseDragonAreaEntrance
+	opEnterDragonAreaEntrance
+	opSmartQueueRegionQueueInfo
+	opSurveyCompleted
 )

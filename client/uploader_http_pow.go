@@ -18,8 +18,8 @@ import (
 )
 
 type httpUploaderPow struct {
-	baseURL   string
-	transport *http.Transport
+	baseURL string
+	client  *http.Client
 }
 
 type Pow struct {
@@ -43,8 +43,8 @@ func newHTTPUploaderPow(url string) uploader {
 	url = strings.Replace(url, "http+pow", "http", -1)
 
 	return &httpUploaderPow{
-		baseURL:   url,
-		transport: &http.Transport{},
+		baseURL: url,
+		client:  &http.Client{Transport: &http.Transport{}, Timeout: httpUploadTimeout},
 	}
 }
 
@@ -52,10 +52,9 @@ func (u *httpUploaderPow) getPow(target interface{}) {
 	log.Debugf("GETTING POW")
 	fullURL := u.baseURL + "/pow"
 
-	client := &http.Client{}
 	req, _ := http.NewRequest("GET", fullURL, nil)
 	req.Header.Add("User-Agent", fmt.Sprintf("albiondata-client/%v", version))
-	resp, err := client.Do(req)
+	resp, err := u.client.Do(req)
 
 	if err != nil {
 		log.Errorf("Error in Pow Get request: %v", err)
@@ -82,7 +81,6 @@ func (u *httpUploaderPow) uploadWithPow(pow Pow, solution string, natsmsg []byte
 
 	fullURL := u.baseURL + "/pow/" + topic
 
-	client := &http.Client{}
 	data := url.Values{
 		"key":        {pow.Key},
 		"solution":   {solution},
@@ -92,7 +90,7 @@ func (u *httpUploaderPow) uploadWithPow(pow Pow, solution string, natsmsg []byte
 	}
 	req, _ := http.NewRequest("POST", fullURL, strings.NewReader(data.Encode()))
 	req.Header.Add("User-Agent", fmt.Sprintf("albiondata-client/%v", version))
-	resp, err := client.Do(req)
+	resp, err := u.client.Do(req)
 
 	if err != nil {
 		log.Errorf("Error while proving pow: %v", err)

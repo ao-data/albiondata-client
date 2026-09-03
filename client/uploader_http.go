@@ -5,27 +5,32 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
+	"time"
 
 	"github.com/ao-data/albiondata-client/log"
 )
 
+// httpUploadTimeout bounds every ingest HTTP request. Without it, a
+// stalled connection during a network hiccup blocks the request's
+// goroutine (one is spawned per decoded operation, see router.go)
+// forever instead of failing and letting that goroutine's memory go.
+const httpUploadTimeout = 30 * time.Second
+
 type httpUploader struct {
-	baseURL   string
-	transport *http.Transport
+	baseURL string
+	client  *http.Client
 }
 
 // newHTTPUploader creates a new HTTP uploader
 func newHTTPUploader(url string) uploader {
 	return &httpUploader{
-		baseURL:   url,
-		transport: &http.Transport{},
+		baseURL: url,
+		client:  &http.Client{Transport: &http.Transport{}, Timeout: httpUploadTimeout},
 	}
 }
 
 func (u *httpUploader) sendToIngest(body []byte, topic string, state *albionState, identifier string) {
 	// not handling sending identifier since the official usage is with http_pow
-
-	client := &http.Client{Transport: u.transport}
 
 	fullURL := u.baseURL + "/" + topic
 
@@ -37,7 +42,7 @@ func (u *httpUploader) sendToIngest(body []byte, topic string, state *albionStat
 
 	req.Header.Set("Content-Type", "application/json")
 
-	resp, err := client.Do(req)
+	resp, err := u.client.Do(req)
 	if err != nil {
 		log.Errorf("Error while sending ingest with data: %v", err)
 		return

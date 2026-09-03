@@ -9,6 +9,19 @@ const (
 	photonHeaderLength   = 12
 	commandHeaderLength  = 12
 	fragmentHeaderLength = 20
+
+	// maxPendingSegments bounds how many in-progress fragment reassemblies
+	// can be tracked at once. Without this cap, a fragment lost to packet
+	// loss (e.g. during a network hiccup) leaves its entry - and the
+	// buffer it allocated - in pendingSegments forever, growing without
+	// bound as more fragmented messages arrive. When full, the oldest
+	// incomplete reassembly is evicted to make room for a new one.
+	maxPendingSegments = 64
+
+	// maxSegmentTotalLength caps the totalLength read off the wire for a
+	// fragmented message, which otherwise sizes a `make([]byte, totalLen)`
+	// allocation directly from unvalidated packet data.
+	maxSegmentTotalLength = 8 << 20 // 8 MiB
 )
 
 // Photon command type constants
@@ -54,6 +67,11 @@ type RawPacket struct {
 // https://github.com/JPCodeCraft/AlbionDataAvalonia.
 type PhotonParser struct {
 	pendingSegments map[int]*segmentedPackage
+	// segmentOrder tracks insertion order of pendingSegments keys so the
+	// oldest incomplete reassembly can be evicted once maxPendingSegments
+	// is reached. Entries for keys already removed from pendingSegments
+	// (completed or previously evicted) are skipped lazily.
+	segmentOrder []int
 
 	// OnRequest is called for every decoded OperationRequest.
 	OnRequest func(operationCode byte, params map[byte]interface{})
@@ -432,11 +450,21 @@ func (p *PhotonParser) handleSendFragment(src []byte, offset, cmdLen int) int {
 
 	seg, ok := p.pendingSegments[startSeq]
 	if !ok {
+		if totalLen <= 0 || totalLen > maxSegmentTotalLength {
+			// Corrupt or hostile totalLength - refuse to allocate for it.
+			return offset + fragLen
+		}
+
+		if len(p.pendingSegments) >= maxPendingSegments {
+			p.evictOldestSegment()
+		}
+
 		seg = &segmentedPackage{
 			totalLength: totalLen,
 			payload:     make([]byte, totalLen),
 		}
 		p.pendingSegments[startSeq] = seg
+		p.segmentOrder = append(p.segmentOrder, startSeq)
 	}
 
 	end := fragOffset + fragLen
@@ -452,6 +480,19 @@ func (p *PhotonParser) handleSendFragment(src []byte, offset, cmdLen int) int {
 	}
 
 	return offset
+}
+
+// evictOldestSegment drops the oldest incomplete fragment reassembly to
+// make room for a new one once maxPendingSegments is reached.
+func (p *PhotonParser) evictOldestSegment() {
+	for len(p.segmentOrder) > 0 {
+		oldest := p.segmentOrder[0]
+		p.segmentOrder = p.segmentOrder[1:]
+		if _, exists := p.pendingSegments[oldest]; exists {
+			delete(p.pendingSegments, oldest)
+			return
+		}
+	}
 }
 
 // available reports whether src[offset:offset+count] is in bounds.

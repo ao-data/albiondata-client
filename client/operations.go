@@ -570,4 +570,5 @@ const (
 	opEnterDragonAreaEntrance
 	opSmartQueueRegionQueueInfo
 	opSurveyCompleted
+	opGetSurveyLogs
 )

@@ -7,6 +7,7 @@ import (
 	"runtime"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"syscall"
 	"time"
 
@@ -224,14 +225,33 @@ func runDashboardApp() {
 		scheduleSaveBounds()
 	})
 
+	// Only forward live updates once the page's JS runtime is up. Until
+	// then Wails queues every emitted event as a JS string in the window's
+	// pendingJS slice, unbounded, to replay on load - and if the page never
+	// loads (e.g. the webview's web process fails to start on a headless
+	// Linux box: "Could not create default EGL display"), that queue grows
+	// for the life of the process, one entry per log line and counters
+	// tick, until the machine runs out of memory. Nothing is lost by
+	// dropping them: the frontend back-fills its state from
+	// DashboardService when it mounts.
+	var frontendReady atomic.Bool
+	dashboardWindow.RegisterHook(events.Common.WindowRuntimeReady, func(e *application.WindowEvent) {
+		frontendReady.Store(true)
+	})
+	emitToFrontend := func(name string, data any) {
+		if frontendReady.Load() {
+			app.Event.Emit(name, data)
+		}
+	}
+
 	dashboard.OnStatusChange(func(s dashboard.Status) {
-		app.Event.Emit("status:changed", s)
+		emitToFrontend("status:changed", s)
 	})
 	dashboard.OnCountersChange(func(c map[string]int64) {
-		app.Event.Emit("counters:snapshot", c)
+		emitToFrontend("counters:snapshot", c)
 	})
 	dashboard.OnLogLine(func(l dashboard.LogLine) {
-		app.Event.Emit("log:line", l)
+		emitToFrontend("log:line", l)
 	})
 
 	setupTray(app, dashboardWindow)

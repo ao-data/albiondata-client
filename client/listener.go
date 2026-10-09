@@ -17,6 +17,16 @@ import (
 	"github.com/google/gopacket/pcap"
 )
 
+// liveCaptureSnapLen is the max bytes captured per packet on a live
+// interface. It must be well above the path MTU: Windows UDP receive
+// segment coalescing (URO, on by default in Windows 11) merges bursts of
+// 1200-byte Photon datagrams into a single packet before Npcap sees it,
+// and market order responses arrive as exactly such a burst (packets up
+// to ~14KB observed). A smaller snaplen truncates those packets, the
+// fragmented response never reassembles, and live market orders are
+// silently dropped while small responses (gold, history) still work.
+const liveCaptureSnapLen = 262144
+
 type listener struct {
 	handle        *pcap.Handle
 	sourcePackets chan gopacket.Packet
@@ -54,7 +64,7 @@ func newListener(router *Router) *listener {
 // nothing to recover it, which would otherwise crash capture on every
 // other interface too.
 func (l *listener) startOnline(device string, port int) {
-	handle, err := pcap.OpenLive(device, 2048, false, pcap.BlockForever)
+	handle, err := pcap.OpenLive(device, liveCaptureSnapLen, false, pcap.BlockForever)
 	if err != nil {
 		log.Errorf("Could not open %s for capture, skipping this interface: %v", device, err)
 		return

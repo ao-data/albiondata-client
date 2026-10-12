@@ -130,7 +130,6 @@ const (
 	evMatchUpdate
 	evActiveMatchUpdate
 	evNewMob
-	evDebugMobInfo
 	evDebugVariablesInfo
 	evDebugReputationInfo
 	evDebugDiminishingReturnInfo
@@ -717,4 +716,5 @@ const (
 	evClusterSyncedStringValuesSnapshot
 	evClusterSyncedBoolValuesSnapshot
 	evClusterSyncedIntValuesSnapshot
+	evFixedRotationForcedMovementPositionUpdate
 )

@@ -571,4 +571,5 @@ const (
 	opSmartQueueRegionQueueInfo
 	opSurveyCompleted
 	opGetSurveyLogs
+	opClientFrametimeSpike
 )
